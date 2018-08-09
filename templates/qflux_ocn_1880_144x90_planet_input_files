@@ -1,0 +1,6 @@
+! prescr. climatological sea ice
+ZSIFAC=SICE4X5.B.1876-85avg.Hadl1.1.nc
+! For q-flux ocean, set KOCEAN=1, ISTART=8
+OHT=OTSPEC.E18M20.MXL65m.1956-1960 ! ocean horizontal heat transport
+OCNML=Z1O.B4X5.cor.nc                ! mixed layer depth (needed for post processing)
+TOPO=Z72X46N.cor4_nocasp.nc       ! topography

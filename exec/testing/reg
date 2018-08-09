@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+# This is the main driver for the modelE regression tests. Try:
+#
+#   $  reg --help
+#
+import time
+import sys
+import argparse
+import os.path
+import regUtils as utils
+import regPool as pool
+import regTools as tools
+import logging
+
+logger = logging.getLogger('main')
+
+#-------------------------------------------------------------------------------
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cfgname',
+                        help='configuration file name (no extension)' )
+    parser.add_argument('-c', '--clean',
+                        action='store_true',
+                        help='clean scratch space' )
+    parser.add_argument('-s', '--show',
+                        action='store_true',
+                        help='display configuration options' )
+    parser.add_argument('-d', '--debug',
+                        action='store_true',
+                        help='debug runs' )
+    args = parser.parse_args()
+    return parser.parse_args()
+
+#-------------------------------------------------------------------------------
+def main():
+# MAIN DRIVER
+    starttime = time.time()
+
+    args = parseArgs()
+
+    cfgfile = str(args.cfgname) + '.cfg'
+    if not os.path.isfile(cfgfile):
+        print ' +++ Error: ' + cfgfile + ' : file does not exist +++'
+        print ' Note: specify configuration file name without extension'
+        sys.exit()
+            
+    utils.loggerSetup(str(args.cfgname))
+
+# Read user-defined config file and store in a config object
+    config = utils.readConfig(cfgfile)
+    utils.header(config)
+
+# COMPCONFIG section contains computational configuration information (compilers,
+# libraries, etc). There are COMPCONFIG defaults in file comp.cfg but those can
+# be overridden in the user-defined config file by re-defining the defaults.
+    if not config.has_section("COMPCONFIG"):
+        compconfig = utils.readConfig('comp.cfg')
+    else:
+        compconfig = config
+
+# Exercise options
+    if args.clean:
+        utils.cleanScratch(config)
+        sys.exit()
+
+    if args.show:
+        utils.showConfig(cfgfile)
+        sys.exit()
+
+    if args.debug:
+        os.environ['DEBUG'] = '1'
+
+# --- modelE specific workflow ---
+    userconfig = utils.ConfigSectionMap(config, 'USERCONFIG')
+    makesystem = userconfig['makesystem']
+
+# Config file contains a list of model configurations pertinent to rundecks.
+# For convenience store that list separately:
+    runList = utils.getModelConfigurations(config)
+
+# Let's setup the testing environment, specific to modelE
+    tools.setupEnv(config, compconfig)
+
+# Define/execute tasks
+    if makesystem == 'makeOld':
+        # Create gitTasks
+        gitTasks = tools.setupCloneTasks(config, compconfig, runList)
+        pool.runCommands(gitTasks, 'no')
+    else:
+        # Setup run directories for out of source builds
+        tools.setupRuns(config, compconfig, runList)
+
+# Create scripts
+    scriptTasks = tools.setupScriptTasks(config, compconfig, runList)
+
+# ... and run them
+    useBatch = userconfig['usebatch']
+    pool.runCommands(scriptTasks, useBatch)
+
+    eTime =  time.time()-starttime
+
+# Notify results via email
+    if userconfig['mailto']:
+        tools.sendDiffreport(config, compconfig, eTime)
+
+    logger.info('Time taken = %f' %(eTime))
+    logger.info(sys.argv[0]+' is done.')
+
+#-------------------------------------------------------------------------------
+# MAIN PROGRAM 
+if __name__ == "__main__":
+    main()

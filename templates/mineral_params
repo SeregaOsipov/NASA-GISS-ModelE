@@ -1,0 +1,26 @@
+!--------- mineralogical dust aerosol parameters----------------
+#include "dust_params_general"
+
+soilDustEmissionDistr=1 ! choose emission size distr. 0: Kandler 2009 low/medium
+                        ! dust(default) 1: Kandler 2009 high dust
+calcEffectiveRadius=0 ! 0: prescribed effective radius (default); 1: calculated
+                      ! using particle size distribution
+calcMineralAggrProb=1 ! 1: calculate aggregation probabilities from min. fract.
+frIronOxideInAggregate=0.05d0 ! fraction of Iron oxide in Mineral-Iron oxide aggregates
+
+! for imDust=0,3-5:
+! AMF method nudged
+scaleDustEmission=0.2025779939 ! scales total dust emission
+  !scaleDustEmission = 0.30927938[1] * 0.655[2]
+  ![1]: emission parameter used for calibration run E20151001TminNu40AMF_001
+  ![2]: optimization factor calculated from calibration run
+! SMF method nudged
+!scaleDustEmission=0.07762912438 ! scales total dust emission
+   !scaleDustEmission = 0.30927938[1] * 0.251[2]
+   ![1] emission parameter used for calibration run E20151001TminNu40SMF_001
+   ![2] optimization factor calculated from calibration run
+fracClayPDFscheme=1.0
+fracSiltPDFscheme=1.0
+! for imDust=1:
+!scaleDustEmission=1.0
+!----------------------------------------------------------------
