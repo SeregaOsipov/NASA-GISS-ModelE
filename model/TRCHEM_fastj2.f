@@ -1408,12 +1408,15 @@ C---Set up total optical depth over each CTM level, DTAUX:
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
-		write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
-		write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
-		write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO2
-		!osipov add SO2 effect on actinic flux
+        write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
+        call write_parallel(trim(out_line),crit=.true.)
+        write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
+        call write_parallel(trim(out_line),crit=.true.)
+        write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO2
+        call write_parallel(trim(out_line),crit=.true.)
+        !osipov add SO2 effect on actinic flux
         if ( so2_j_feedback == 1) then
-        	DTAUX(J)=DTAUX(J)+XLSO2
+          DTAUX(J)=DTAUX(J)+XLSO2
         endif
 #ifdef TRACERS_ON
         XLAER(:)=AER2(J,:)*QXMIE(:,J) ! njaero
