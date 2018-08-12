@@ -1403,12 +1403,14 @@ C---Set up total optical depth over each CTM level, DTAUX:
       do J=J1,NBFASTJ
         XLO3=DO32(J)*XQO3_2(J)
         XLO2=DMFASTJ2(J)*XQO2_2(J)*pO2*o2x
-        !osipov
         !osipov //TODO: check how OD is computed
         XLSO2=dso22(J)*XQSO2_2(J)
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
+		write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
+		write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
+		write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO3
 		!osipov add SO2 effect on actinic flux
         if ( so2_j_feedback == 1) then
         	DTAUX(J)=DTAUX(J)+XLSO2
