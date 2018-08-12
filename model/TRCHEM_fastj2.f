@@ -5,6 +5,7 @@
       USE DOMAIN_DECOMP_ATM, only: write_parallel 
       use constant, only: pO2
       use RAD_COM, only: o2x
+      use dictionary_mod, only : get_param
 #ifdef TRACERS_ON
       use RAD_COM, only: njaero
 #endif
@@ -64,7 +65,7 @@
       character(len=7), dimension(3,njval) :: titlej
 !osipov, have to create dummy so2 variables, due to 3 index shift logic
 !@var titlej_so2 titles, dummy
-character(len=7), dimension(3,1) :: titlej_so2
+      character(len=7), dimension(3,1) :: titlej_so2
 
 !@var title_aer_pf titles read from aerosol phase function file
       character(len=20), dimension(np) :: title_aer_pf !formerly TITLEA( )
@@ -189,8 +190,8 @@ character(len=7), dimension(3,1) :: titlej_so2
 !@var dso22 fastj2 SO2 number density at each pressure level (")
 !@var zfastj2 Altitude of boundaries of model levels (cm) fastj2
 !@var dmfastj2 fastj2 Air column for each model level (molec/cm2)
-      real*8, allocatable, dimension(:) :: tj2,do32,dso22,
-      &										zfastj2,dmfastj2
+      real*8, allocatable, dimension(:) :: tj2,do32,dso22
+     &                                     ,zfastj2,dmfastj2
 !@var tfastj temperature profile sent to FASTJ
 !@var odcol Optical depth at each model level
       real*8, allocatable, dimension(:) :: tfastj,odcol
@@ -1346,7 +1347,7 @@ C**** Local parameters and variables and arguments:
 ! jaddto(i)=Total number of new levels to add to and above level (i)
 !osipov so2 j feedback flag
 !@dbparam so2_j_feedback = 1 for SO2 effect on actinic flux calculation
-	  integer :: so2_j_feedback = 1
+      integer :: so2_j_feedback = 1
       integer :: KW,km,i,j,k,l,ix,j1,ND
       character(len=300) :: out_line
       REAL*8, ALLOCATABLE, DIMENSION(:) :: DTAUX,PIRAY2
@@ -1373,7 +1374,7 @@ C**** Local parameters and variables and arguments:
       allocate( FTAU(NCFASTJ2+1) )
       
       !osipov
-      call sync_param( "so2_j_feedback", so2_j_feedback )
+      call get_param( "so2_j_feedback", so2_j_feedback )
     
 C---Pick nearest Mie wavelength, no interpolation--------------
                              KM=1

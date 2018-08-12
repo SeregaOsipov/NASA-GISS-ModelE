@@ -644,7 +644,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         DO L=1,topLevelOfChemistry
           O3_FASTJ(L)=y(nO3,L)/y(nM,L)
           !osipov add SO2, //TODO: check units everywhere
-		  SO2_FASTJ(L)=y(nSO2,L)/y(nM,L)
+          SO2_FASTJ(L)=yso2(I,J,L)
         END DO
 
 ! calculate photolysis rates
