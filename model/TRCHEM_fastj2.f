@@ -189,7 +189,8 @@ character(len=7), dimension(3,1) :: titlej_so2
 !@var dso22 fastj2 SO2 number density at each pressure level (")
 !@var zfastj2 Altitude of boundaries of model levels (cm) fastj2
 !@var dmfastj2 fastj2 Air column for each model level (molec/cm2)
-      real*8, allocatable, dimension(:) :: tj2,do32,dso22,zfastj2,dmfastj2
+      real*8, allocatable, dimension(:) :: tj2,do32,dso22,
+      &										zfastj2,dmfastj2
 !@var tfastj temperature profile sent to FASTJ
 !@var odcol Optical depth at each model level
       real*8, allocatable, dimension(:) :: tfastj,odcol
