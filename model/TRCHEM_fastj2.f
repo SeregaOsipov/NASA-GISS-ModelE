@@ -2253,15 +2253,17 @@ C Read O2 X-sects, O3 X-sects, O3=>O(1D) quant yields(each at 3 temps):
       DO K=1,3
         READ(NJ1,103) TITLEJ(K,2),TQQ(K,2), (QO3(IW,K),IW=1,NWWW)
       ENDDO
+
+      !osipov also read the SO2 into separate variable
+      !osipov, otherwise the questionable logic of 3 index shift will break 
+      !osipov //TODO: put actual SO2 data into the jv_spec_AV_X68d_osipov.dat
+   	  !osipov, //TODO: fix the format of the data
+   	  K=1
+   	  READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)      
+      
       DO K=1,3
         READ(NJ1,103) TITLEJ(K,3),TQQ(K,3), (Q1D(IW,K),IW=1,NWWW)
       ENDDO
-!osipov also read the SO2 into separate variable
-!osipov, otherwise the questionable logic of 3 index shift will break 
-!osipov //TODO: put actual SO2 data into the jv_spec_AV_X68d_osipov.dat
-	  !osipov, //TODO: fix the format of the data
-	  K=1
-  	  READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)
 	  
       do k=1,3
         write(out_line,200) titlej(1,k),(tqq(i,k),i=1,3)
