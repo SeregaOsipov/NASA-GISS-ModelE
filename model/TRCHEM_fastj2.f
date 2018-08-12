@@ -1345,8 +1345,7 @@ C**** Local parameters and variables and arguments:
 ! jaddto(i)=Total number of new levels to add to and above level (i)
 !osipov so2 j feedback flag
 !@dbparam so2_j_feedback = 1 for SO2 effect on actinic flux calculation
-INTEGER :: so2_j_feedback = 0  ! defaults to 0
-
+	  integer :: so2_j_feedback = 1
       integer :: KW,km,i,j,k,l,ix,j1,ND
       character(len=300) :: out_line
       REAL*8, ALLOCATABLE, DIMENSION(:) :: DTAUX,PIRAY2
