@@ -104,7 +104,8 @@ c
       use subdd_mod, only : subdd_groups,subdd_type,subdd_ngroups
      &     ,inc_subdd,find_groups, LmaxSUBDD
 #endif
-      use photolysis, only: fastj2_drv,o3_fastj,rj
+!osipov add so2
+      use photolysis, only: fastj2_drv,o3_fastj,so2_fastj,rj
      &                     ,sza,szamax,zj,jpnl,sf3_fact,sf2_fact
 
       IMPLICIT NONE
@@ -642,6 +643,8 @@ c Pass O3 array (in ppmv; here seems to be ppv) to fastj. Above these
 C levels fastj2 uses Nagatani climatological O3, read in by chem_init: 
         DO L=1,topLevelOfChemistry
           O3_FASTJ(L)=y(nO3,L)/y(nM,L)
+          !osipov add SO2, //TODO: check units everywhere
+		  SO2_FASTJ(L)=y(nSO2,L)/y(nM,L)
         END DO
 
 ! calculate photolysis rates

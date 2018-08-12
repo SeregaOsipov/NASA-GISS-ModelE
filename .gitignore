@@ -16,3 +16,4 @@ build/*
 *.pik
 spack-build.*
 spconfig.py
+/bin/

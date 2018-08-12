@@ -62,6 +62,10 @@
       character(len=7), dimension(3) :: lpdep
 !@var titlej titles read from O2, O3, and other species X-sections
       character(len=7), dimension(3,njval) :: titlej
+!osipov, have to create dummy so2 variables, due to 3 index shift logic
+!@var titlej_so2 titles, dummy
+character(len=7), dimension(3,1) :: titlej_so2
+
 !@var title_aer_pf titles read from aerosol phase function file
       character(len=20), dimension(np) :: title_aer_pf !formerly TITLEA( )
 !@var jndlev Levels at which we want J-values (centre of CTM levels)
@@ -139,6 +143,11 @@
 #else
       real*8, dimension(3,njval)       :: tqq
 #endif
+
+!osipov
+!@var tqq_so2 Temperature for so2 cross sections
+	  real*8, dimension(3,1)       :: tqq_so2
+
 !@var qaafastj Aerosol scattering phase functions
 !@var waafastj Wavelengths for the NK supplied phase functions
       real*8, dimension(4,np)          :: qaafastj,waafastj
@@ -155,9 +164,11 @@
       real*8, dimension(nwfastj+1)     :: wbin
 !@var qo2 O2 cross-sections
 !@var qo3 O3 cross-sections
+!osipov add so2
+!@var qso2 SO2 cross-sections
 !@var q1d O3 => O(1D) quantum yield
 !@var zpdep Pressure dependencies by wavelength bin
-      real*8, dimension(nwfastj,3)     :: qo2,qo3,q1d,zpdep !XXX zpdep XXXXXXXXX
+      real*8, dimension(nwfastj,3)     :: qo2,qo3,qso2,q1d,zpdep !XXX zpdep XXXXXXXXX
 !@var qqq Supplied cross sections in each wavelength bin (cm2),
 !@+       read in in RD_TJPL
 #ifndef AR5_FASTJ_XSECS /* NOT */
@@ -173,17 +184,21 @@
 !@var amf Air mass factor for slab between level and level above
       real*8, allocatable, dimension(:,:):: amf
 !@var tj2 Temperature profile on fastj2 photolysis grid
-!@var do32 fastj2 Ozone number density at each pressure level (")
+!@var do32 fastj2 Ozone number density at each pressure level (")"
+!osipov add so2
+!@var dso22 fastj2 SO2 number density at each pressure level (")
 !@var zfastj2 Altitude of boundaries of model levels (cm) fastj2
 !@var dmfastj2 fastj2 Air column for each model level (molec/cm2)
-      real*8, allocatable, dimension(:) :: tj2,do32,zfastj2,dmfastj2
+      real*8, allocatable, dimension(:) :: tj2,do32,dso22,zfastj2,dmfastj2
 !@var tfastj temperature profile sent to FASTJ
 !@var odcol Optical depth at each model level
       real*8, allocatable, dimension(:) :: tfastj,odcol
 !@var pfastj2 pressure at level boundaries, sent to FASTJ2
       real*8, allocatable, dimension(:) :: pfastj2
 !@var o3_fastj ozone sent to fastj
-      real*8, allocatable, dimension(:) :: o3_fastj
+!osipov add so2
+!@var so2_fastj SO2 sent to fastj
+      real*8, allocatable, dimension(:) :: o3_fastj, so2_fastj
 !@var ssa single scattering albedo ?
 !@var raa ?
       real*8, dimension(4,np) :: ssa,raa
@@ -406,8 +421,6 @@ c       define pressures to be sent to FASTJ (edges):
         PFASTJ2(NLGCM+2)=PFASTJ2(NLGCM+1)*0.2816 ! 0.00058d0/0.00206d0 ! fudge
         PFASTJ2(NLGCM+3)=PFASTJ2(NLGCM+2)*0.4828 ! 0.00028d0/0.00058d0 ! fudge
 
-!osipov
-	write(*,*) "osipov fastj2_drv is calling photoj"
         call photoj(I,J,surfaceAlbedo) ! CALL THE PHOTOLYSIS SCHEME
       end subroutine fastj2_drv
 
@@ -618,6 +631,8 @@ c  temperature half a layer on either side of the point supplied:
 c Overwrite O3 with GISS chemistry O3:
       DO32(1:NLGCM)=O3_FASTJ(1:NLGCM)
       TJ2(1:NLGCM) =TFASTJ(1:NLGCM)
+      !osipov add SO2
+      DSO22(1:NLGCM)=SO2_FASTJ(1:NLGCM)
 
 c  Calculate effective altitudes using scale height at each level
       zfastj2(1) = 0.d0
@@ -661,8 +676,12 @@ c  Calculate column quantities for Fast-J2:
       do i=1,NBFASTJ
         DMFASTJ2(i)  = (PFASTJ2(i)-PFASTJ2(i+1))*masfac
         DO32(i) = DO32(i)*DMFASTJ2(i)
+        !osipov add so2
+        DSO22(i) = DSO22(i)*DMFASTJ2(i)
       enddo
       DO32(NBFASTJ)=DO32(NBFASTJ)*1.E2
+      !osipov add so2
+	  DSO22(NBFASTJ)=DSO22(NBFASTJ)*1.E2
 
       return
       end subroutine set_prof
@@ -859,6 +878,7 @@ C---Calculate columns, for diagnostic output only:
       allocate( COLO3(NBFASTJ) )
       COLO3(NBFASTJ) = DO32(NBFASTJ)
       COLO2(NBFASTJ) = DMFASTJ2(NBFASTJ)*pO2*o2x
+      !osipov maybe add so2 diags as well?
 #ifdef TRACERS_ON
       allocate(colax(njaero,NBFASTJ))
       COLAX(:,NBFASTJ) = AER2(NBFASTJ,:)
@@ -957,16 +977,20 @@ C---Print out climatology:
 C**** Local parameters and variables and arguments:
 !@var XQO3_2   fastj2 Absorption cross-section of O3
 !@var XQO2_2   fastj2 Absorption cross-section of O2
+!osipov, add so2
+!@var XQSO2_2   fastj2 Absorption cross-section of S2
 !@var WAVE Effective wavelength of each wavelength bin
 !@var AVGF Attenuation of beam at each level for each wavelength
       INTEGER                    :: K,J
       INTEGER, INTENT(IN)        :: NSLON, NSLAT
-      REAL*8, ALLOCATABLE, DIMENSION(:) :: XQO3_2, XQO2_2
+      REAL*8, ALLOCATABLE, DIMENSION(:) :: XQO3_2, XQO2_2, XQSO2_2
       REAL*8, ALLOCATABLE, DIMENSION(:) :: AVGF
       REAL*8                     :: WAVE
 
       allocate( XQO3_2(NBFASTJ) )
       allocate( XQO2_2(NBFASTJ) )
+      !osipov
+      allocate( XQSO2_2(NBFASTJ) )
       allocate( AVGF(JPNL) )
 
       AVGF(:) = 0.d0   ! JPNL
@@ -981,18 +1005,43 @@ C---Loop over all wavelength bins:
         DO J=1,NBFASTJ
           XQO3_2(J) = XSECO3(K,TJ2(J))
           XQO2_2(J) = XSECO2(K,TJ2(J))
+          !osipov
+		  XQSO2_2(J) = XSECSO2(K,TJ2(J))
         END DO
-        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,AVGF)
+        !osipov, pass additionally SO2
+        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
       END DO
 
       deallocate( XQO3_2 )
       deallocate( XQO2_2 )
+      !osipov
+      deallocate( XQSO2_2 )
       deallocate( AVGF   )
 
       RETURN
       END SUBROUTINE JVALUE
 
+      
+!osipov, this function really is not needed because there is almost no
+!osipov so2 sensetivity to temperature, but I've added just in case
+      REAL*8 FUNCTION XSECSO2(K,TTT)
+      !@sum XSECSO2  SO2 Cross-sections for all processes interpolated across
+      !@+   3 temps
+      !@calls FLINT
+
+      IMPLICIT NONE
+
+C**** Local parameters and variables and arguments:
+!@var k passed index for wavelength bin
+!@var TTT returned termperature profile
+      INTEGER, INTENT(IN) :: k
+      real*8              :: TTT
+        
+      XSECSO2 = QSO2(K,1)
+      RETURN
+      END FUNCTION XSECSO2      
+      
 
 
       REAL*8 FUNCTION XSECO3(K,TTT)
@@ -1192,8 +1241,8 @@ c Lowest level intersected by emergent beam;
       END SUBROUTINE SPHERE
 
 
-
-      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2,FMEAN)
+      
+      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2, XQSO2_2,FMEAN)
 !@sum OPMIE NEW Mie code for Js, only uses 8-term expansion, 
 !@+   4-Gauss pts.
 !@auth UCI (see note above), GCM incorporation: Drew Shindell,
@@ -1294,12 +1343,17 @@ C**** Local parameters and variables and arguments:
 ! POMEGA=Scattering phase function
 ! jaddlv(i)=Number of new levels to add between (i) and (i+1)
 ! jaddto(i)=Total number of new levels to add to and above level (i)
+!osipov so2 j feedback flag
+!@dbparam so2_j_feedback = 1 for SO2 effect on actinic flux calculation
+INTEGER :: so2_j_feedback = 0  ! defaults to 0
 
       integer :: KW,km,i,j,k,l,ix,j1,ND
       character(len=300) :: out_line
       REAL*8, ALLOCATABLE, DIMENSION(:) :: DTAUX,PIRAY2
       REAL*8, INTENT(IN) :: XQO2_2(:)
       REAL*8, INTENT(IN) :: XQO3_2(:)
+      !osipov
+      REAL*8, INTENT(IN) :: XQSO2_2(:)
       REAL*8, ALLOCATABLE, DIMENSION(:) :: TTAU,FTAU
       REAL*8, INTENT(OUT) :: FMEAN(:)
 #ifdef TRACERS_ON
@@ -1309,13 +1363,17 @@ C**** Local parameters and variables and arguments:
 #endif
       REAL*8, INTENT(IN) :: WAVEL
       REAL*8, DIMENSION(2*M__) :: dpomega,dpomega2
-      REAL*8 xlo2,xlo3,xlray,xltau2,zk,zk2,taudn,tauup,
+      !osipov add so2
+      REAL*8 xlo2,xlo3,xlso2,xlray,xltau2,zk,zk2,taudn,tauup,
      & ftaulog,dttau,ftaulog2,dttau2
 
       allocate( DTAUX(NBFASTJ) )
       allocate( PIRAY2(NBFASTJ) )
       allocate( TTAU(NCFASTJ2+1) )
       allocate( FTAU(NCFASTJ2+1) )
+      
+      !osipov
+      call sync_param( "so2_j_feedback", so2_j_feedback )
     
 C---Pick nearest Mie wavelength, no interpolation--------------
                              KM=1
@@ -1344,9 +1402,16 @@ C---Set up total optical depth over each CTM level, DTAUX:
       do J=J1,NBFASTJ
         XLO3=DO32(J)*XQO3_2(J)
         XLO2=DMFASTJ2(J)*XQO2_2(J)*pO2*o2x
+        !osipov
+        !osipov //TODO: check how OD is computed
+        XLSO2=dso22(J)*XQSO2_2(J)
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
+		!osipov add SO2 effect on actinic flux
+        if ( so2_j_feedback == 1) then
+        	DTAUX(J)=DTAUX(J)+XLSO2
+        endif
 #ifdef TRACERS_ON
         XLAER(:)=AER2(J,:)*QXMIE(:,J) ! njaero
 c Total optical depth from all elements:
@@ -2188,6 +2253,13 @@ C Read O2 X-sects, O3 X-sects, O3=>O(1D) quant yields(each at 3 temps):
       DO K=1,3
         READ(NJ1,103) TITLEJ(K,3),TQQ(K,3), (Q1D(IW,K),IW=1,NWWW)
       ENDDO
+!osipov also read the SO2 into separate variable
+!osipov, otherwise the questionable logic of 3 index shift will break 
+!osipov //TODO: put actual SO2 data into the jv_spec_AV_X68d_osipov.dat
+	  !osipov, //TODO: fix the format of the data
+	  K=1
+  	  READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)
+	  
       do k=1,3
         write(out_line,200) titlej(1,k),(tqq(i,k),i=1,3)
         call write_parallel(trim(out_line))
