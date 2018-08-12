@@ -1410,7 +1410,7 @@ C---Set up total optical depth over each CTM level, DTAUX:
         DTAUX(J)=XLO3+XLO2+XLRAY
 		write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
 		write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
-		write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO3
+		write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO2
 		!osipov add SO2 effect on actinic flux
         if ( so2_j_feedback == 1) then
         	DTAUX(J)=DTAUX(J)+XLSO2
