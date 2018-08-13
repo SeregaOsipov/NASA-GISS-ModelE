@@ -86,10 +86,13 @@ cd "$CMRUNDIR/$RUNID"
 echo "#!/bin/bash" > $run_command
 echo "#SBATCH --job-name=modelE" >> $run_command
 echo "#SBATCH --partition=workq" >> $run_command
+echo "#SBATCH --output=output.txt" >> $run_command
+echo "#SBATCH --error=error.txt" >> $run_command
 echo "#SBATCH --ntasks-per-node=32" >> $run_command
 echo "#SBATCH --time=1440:00" >> $run_command
 echo "#SBATCH --mail-type=FAIL" >> $run_command
 echo "#SBATCH --mail-user=Sergey.Osipov@kaust.edu.sa" >> $run_command
+echo "echo 'qsub script started'" >> $run_command
 #echo "if [ -s modules ] ; then" >> $run_command
 #echo "  if [ -f /usr/share/modules/init/bash ] ; then . /usr/share/modules/init/bash ; fi" >>  $run_command
 #echo "  if [ -f /usr/share/Modules/init/bash ] ; then . /usr/share/Modules/init/bash ; fi" >>  $run_command

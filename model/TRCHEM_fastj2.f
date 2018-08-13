@@ -147,7 +147,7 @@
 
 !osipov
 !@var tqq_so2 Temperature for so2 cross sections
-	  real*8, dimension(3,1)       :: tqq_so2
+      real*8, dimension(3,1)       :: tqq_so2
 
 !@var qaafastj Aerosol scattering phase functions
 !@var waafastj Wavelengths for the NK supplied phase functions
@@ -1008,7 +1008,7 @@ C---Loop over all wavelength bins:
           XQO3_2(J) = XSECO3(K,TJ2(J))
           XQO2_2(J) = XSECO2(K,TJ2(J))
           !osipov
-		  XQSO2_2(J) = XSECSO2(K,TJ2(J))
+          XQSO2_2(J) = XSECSO2(K,TJ2(J))
         END DO
         !osipov, pass additionally SO2
         CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,AVGF)
@@ -1408,6 +1408,7 @@ C---Set up total optical depth over each CTM level, DTAUX:
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
+        write(*,*) "osipovs OPMIE"
         write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
         call write_parallel(trim(out_line),crit=.true.)
         write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
@@ -2260,14 +2261,14 @@ C Read O2 X-sects, O3 X-sects, O3=>O(1D) quant yields(each at 3 temps):
       !osipov also read the SO2 into separate variable
       !osipov, otherwise the questionable logic of 3 index shift will break 
       !osipov //TODO: put actual SO2 data into the jv_spec_AV_X68d_osipov.dat
-   	  !osipov, //TODO: fix the format of the data
-   	  K=1
-   	  READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)      
+      !osipov, //TODO: fix the format of the data
+      K=1
+      READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)
       
       DO K=1,3
         READ(NJ1,103) TITLEJ(K,3),TQQ(K,3), (Q1D(IW,K),IW=1,NWWW)
       ENDDO
-	  
+
       do k=1,3
         write(out_line,200) titlej(1,k),(tqq(i,k),i=1,3)
         call write_parallel(trim(out_line))
