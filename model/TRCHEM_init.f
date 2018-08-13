@@ -317,7 +317,7 @@ C**** Local parameters and variables and arguments:
        use photolysis, only: NLGCM,ncfastj2,nbfastj,jpnl,jndlev,
      & pomegaj,fff,amf,tj2,do32,zfastj2,dmfastj2,tfastj,odcol,
       !osipov add so2
-     & pfastj2,o3_fastj,so2_fastj,M__,nwfastj
+     & dso22,pfastj2,o3_fastj,so2_fastj,M__,nwfastj
 
       implicit none 
 
@@ -349,6 +349,8 @@ C**** Local parameters and variables and arguments:
       allocate(amf(nbfastj,nbfastj))
       allocate(tj2(nbfastj))
       allocate(do32(nbfastj))
+      !osipov
+      allocate(dso22(nbfastj))
       allocate(zfastj2(nbfastj))
       allocate(dmfastj2(nbfastj))
       allocate(tfastj(NLGCM))
