@@ -629,7 +629,7 @@ c  temperature half a layer on either side of the point supplied:
         TJ2(i) = T0
         DO32(i)= F0*1.d-6
         !osipov, prescribe 0 for so2 at the extra layer at the top
-		DSO22(i)= 0.d0
+        DSO22(i)= 0.d0
       end do
 
 c Overwrite O3 with GISS chemistry O3:
