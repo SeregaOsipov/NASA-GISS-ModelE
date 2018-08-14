@@ -187,7 +187,7 @@
 !@var tj2 Temperature profile on fastj2 photolysis grid
 !@var do32 fastj2 Ozone number density at each pressure level (")"
 !osipov add so2
-!@var dso22 fastj2 SO2 number density at each pressure level (")
+!@var dso22 fastj2 SO2 number density at each pressure level (#/cm^2)
 !@var zfastj2 Altitude of boundaries of model levels (cm) fastj2
 !@var dmfastj2 fastj2 Air column for each model level (molec/cm2)
       real*8, allocatable, dimension(:) :: tj2,do32,dso22
@@ -628,12 +628,14 @@ c  temperature half a layer on either side of the point supplied:
         end do
         TJ2(i) = T0
         DO32(i)= F0*1.d-6
+        !osipov, prescribe 0 for so2 at the extra layer at the top
+		DSO22(i)= 0.d0
       end do
 
 c Overwrite O3 with GISS chemistry O3:
       DO32(1:NLGCM)=O3_FASTJ(1:NLGCM)
       TJ2(1:NLGCM) =TFASTJ(1:NLGCM)
-      !osipov add SO2
+      !osipov add SO2, currently it is in #/cm^3
       DSO22(1:NLGCM)=SO2_FASTJ(1:NLGCM)
 
 c  Calculate effective altitudes using scale height at each level
@@ -642,6 +644,11 @@ c  Calculate effective altitudes using scale height at each level
         scaleh=1.3806d-19*masfac*TFASTJ(LL)
         zfastj2(LL+1)=zfastj2(LL)-
      &                (log(PFASTJ2(LL+1)/PFASTJ2(LL))*scaleh)
+      enddo
+c  osipov, integrate DSO22 vertically
+      do LL=1,NLGCM
+        !zfastj2 units are in cm, result is in #/cm^2
+    	DSO22(LL)=DSO22(LL)*(zfastj2(LL+1)-zfastj2(LL))
       enddo
 
 c  Add Aerosol Column - include aerosol (+cloud) types here. 
@@ -678,12 +685,8 @@ c  Calculate column quantities for Fast-J2:
       do i=1,NBFASTJ
         DMFASTJ2(i)  = (PFASTJ2(i)-PFASTJ2(i+1))*masfac
         DO32(i) = DO32(i)*DMFASTJ2(i)
-        !osipov add so2
-        DSO22(i) = DSO22(i)*DMFASTJ2(i)
       enddo
       DO32(NBFASTJ)=DO32(NBFASTJ)*1.E2
-      !osipov add so2
-	  DSO22(NBFASTJ)=DSO22(NBFASTJ)*1.E2
 
       return
       end subroutine set_prof
@@ -1408,13 +1411,6 @@ C---Set up total optical depth over each CTM level, DTAUX:
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
-        write(*,*) "osipovs OPMIE"
-        !write(out_line,*) 'osipov DO32, XQO3_2', DO32,XQO3_2
-        !call write_parallel(trim(out_line),crit=.true.)
-        !write(out_line,*) 'osipov dso22, XQSO2_2', dso22,XQSO2_2
-        !call write_parallel(trim(out_line),crit=.true.)
-        !write(out_line,*) 'osipov XLO3, XLO2 XLSO2', XLO3,XLO2,XLSO2
-        !call write_parallel(trim(out_line),crit=.true.)
         !osipov add SO2 effect on actinic flux
         if ( so2_j_feedback == 1) then
           DTAUX(J)=DTAUX(J)+XLSO2

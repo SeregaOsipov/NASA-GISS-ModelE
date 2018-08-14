@@ -643,7 +643,8 @@ c Pass O3 array (in ppmv; here seems to be ppv) to fastj. Above these
 C levels fastj2 uses Nagatani climatological O3, read in by chem_init: 
         DO L=1,topLevelOfChemistry
           O3_FASTJ(L)=y(nO3,L)/y(nM,L)
-          !osipov add SO2, //TODO: check units everywhere
+          !osipov add SO2, it seems that yso2 units will be #/cm^3
+          !volume number density of the SO2
           SO2_FASTJ(L)=yso2(I,J,L)
         END DO
 
