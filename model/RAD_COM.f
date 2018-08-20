@@ -204,7 +204,7 @@ C**** does not produce exactly the same as the default values.
       REAL*8, ALLOCATABLE, DIMENSION(:,:) :: CFRAC ! saved in rsf
 !@var RCLD Total cloud optical depth as seen be radiation
       REAL*8, ALLOCATABLE, DIMENSION(:,:,:) :: RCLD ! saved in rsf
-!@var chem_tracer_save 3D O3, CH4 saved elsewhere for use in radiation
+!@var chem_tracer_save 3D O3, CH4, SO2 saved elsewhere for use in radiation
       REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: chem_tracer_save!saved rsf
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
 !@var stratO3_tracer_save 3D stratOx saved elsewhere for use in rad code
@@ -413,7 +413,7 @@ C**** Local variables initialised in init_RAD
      *     SRDN(I_0H:I_1H, J_0H:J_1H),
      *     CFRAC(I_0H:I_1H, J_0H:J_1H),
      *     RCLD(LM, I_0H:I_1H, J_0H:J_1H),
-     *     chem_tracer_save(2,LM, I_0H:I_1H, J_0H:J_1H),
+     *     chem_tracer_save(3,LM, I_0H:I_1H, J_0H:J_1H),
      *     rad_to_chem(5, LM, I_0H:I_1H, J_0H:J_1H),
      *     rad_to_file(5, LM, I_0H:I_1H, J_0H:J_1H),
      *     SNOAGE(3,I_0H:I_1H,J_0H:J_1H),
@@ -503,7 +503,7 @@ C**** Local variables initialised in init_RAD
      &     SRDN_GLOB, CFRAC_GLOB, SALB_GLOB,
      &     FSRDIF_GLOB, DIRNIR_GLOB, DIFNIR_GLOB
 #ifdef TRACERS_SPECIAL_Shindell
-      REAL*8,DIMENSION(:,:,:,:),allocatable::chem_tracer_save_GLOB !(2,LM,IM,JM)
+      REAL*8,DIMENSION(:,:,:,:),allocatable::chem_tracer_save_GLOB !(3,LM,IM,JM)
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
       REAL*8,DIMENSION(:,:,:),allocatable::stratO3_tracer_save_GLOB !(LM,IM,JM)
 #endif
@@ -545,7 +545,8 @@ C**** Local variables initialised in init_RAD
      &     DIFNIR_GLOB(img,jmg))
       allocate(RCLD_GLOB(lmg,img,jmg))
 #ifdef TRACERS_SPECIAL_Shindell
-      allocate(chem_tracer_save_GLOB(2,lmg, img,jmg))
+	  !osipov increase size 2->3 for SO2
+      allocate(chem_tracer_save_GLOB(3,lmg, img,jmg))
       allocate(rad_to_chem_GLOB(5,lmg,img,jmg))
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
       allocate(stratO3_tracer_save_GLOB(lmg, img, jmg))
@@ -805,8 +806,9 @@ C**** Local variables initialised in init_RAD
 #endif  /* CACHED_SUBDD */
       endif
 #ifdef TRACERS_SPECIAL_Shindell
+!osipov increase size two->3
       call defvar(grid,fid,chem_tracer_save,
-     &     'chem_tracer_save(two,lm,dist_im,dist_jm)')
+     &     'chem_tracer_save(three,lm,dist_im,dist_jm)')
       call defvar(grid,fid,rad_to_chem,
      &     'rad_to_chem(five,lm,dist_im,dist_jm)')
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)

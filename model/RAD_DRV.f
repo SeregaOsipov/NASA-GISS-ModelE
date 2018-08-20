@@ -2663,7 +2663,7 @@ C**** Currently this works for aerosols and ozone but should be extended
 C**** to cope with all trace gases.
 C****
       FTAUC=1. ! deflt (clouds on)
-      use_tracer_chem(:) = 0 ! by default use climatological ozone/ch4
+      use_tracer_chem(:) = 0 ! by default use climatological ozone/ch4/so2
 C**** Set level for inst. rad. forc. calcs for aerosols/trace gases
 C**** This is set from the rundeck.
       LFRC=LM+LM_REQ+1          ! TOA
@@ -2685,9 +2685,15 @@ C YUNHA LEE - took the shindell outside of the Koch/dust directives.
 C**** Ozone and Methane:
       CHEM_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)
       CHEM_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM
+      !osipov add SO2
+      !osipov //TODO: check conversation units
+      chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
       if (clim_interact_chem > 0) then
         use_tracer_chem(1)=Lmax_rad_O3  ! O3
         use_tracer_chem(2)=Lmax_rad_CH4 ! CH4
+        !osipov add SO2
+        !osipov //TODO: add the variable
+        use_tracer_chem(3)=Lmax_rad_SO2 ! SO2
       endif
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
       if(clim_interact_chem<=0)
@@ -2785,6 +2791,9 @@ C**** Ozone:
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
         chem_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)  ! Ozone
         chem_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM  ! Methane
+        !osipov add SO2
+        !osipov //TODO: check conversation units
+        chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS
 ! TOA GHG rad forcing: nf=1,4 are CH4, N2O, CFC11, and CFC12:

@@ -38,7 +38,7 @@ c
       use OldTracer_mod, only: tr_wd_type, nWater
       USE TRACER_COM, only  : ntm_chem_beg, ntm_chem_end
       USE TRACER_COM, only  : n_Ox,n_NOx,n_N2O5,n_HNO3,n_H2O2,
-     &                      n_HCHO,n_HO2NO2,n_CO,n_CH4,
+     &                      n_HCHO,n_HO2NO2,n_CO,n_CH4,n_SO2, !osipov add so2
      &                      n_Isoprene,n_AlkylNit,n_Alkenes,n_stratOx,
      &                      n_Terpenes,n_SO4,n_H2O2_s,oh_live,no3_live,
      &                      ntm_chem,n_DMS,n_MSA,n_SO2,
@@ -2251,6 +2251,13 @@ c (radiation code wants atm-cm units):
             ! Here do it in atm-cm units for direct NINT input for rad code.
             taijls(i,j,L,ijlt_O3cmatm)=taijls(i,j,L,ijlt_O3cmatm)+
      &      chem_tracer_save(1,L,i,j)
+     
+!osipov add the SO2
+!osipov, //TODO: check units, SO2 vs CH4
+			chem_tracer_save(3,L,i,j)=(trm(i,j,L,n_SO2) +
+			&      (tr3Dsource(i,j,L,nChemistry,n_SO2) + 
+			&      tr3Dsource(i,j,L,nOverwrite,n_SO2))*dtsrc)
+			&      *byaxyp(i,j)*avog/(tr_mm(n_SO2)*2.69e20)
           end do
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
           strato3_tracer_save(1:LM,i,j)=(trm(i,j,1:LM,n_stratOx) +

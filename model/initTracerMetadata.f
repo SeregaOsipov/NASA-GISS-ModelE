@@ -572,6 +572,8 @@
      &     PIratio_CO_S,PIratio_other,allowSomeChemReinit,
      &     CH4ICIN,CH4ICX,CH4ICINL,CH4ICL,
      &     COICIN,COIC,COICINL,COICL,Lmax_rad_O3,Lmax_rad_CH4
+     !osipov add SO2
+     &     ,Lmax_rad_SO2
      &     ,BrOxaltIN,ClOxaltIN,ClONO2altIN,HClaltIN,BrOxalt,
      &     ClOxalt,ClONO2alt,HClalt,N2OICIN,N2OICX,N2OICINL,N2OICL,
      &     CFCICIN,CFCIC,CFCICINL,CFCICL,PIratio_N2O,PIratio_CFC,
@@ -682,6 +684,9 @@ C**** set super saturation parameter for isotopes if needed
       call sync_param("rad_FL",rad_fl)
       call sync_param("Lmax_rad_O3",Lmax_rad_O3)
       call sync_param("Lmax_rad_CH4",Lmax_rad_CH4)
+      !osipov add SO2
+      !osipov //TODO: check the value in the debugger and *.R file
+      call sync_param("Lmax_rad_SO2",Lmax_rad_SO2)
       call sync_param("use_rad_n2o",use_rad_n2o)
       call sync_param("use_rad_cfc",use_rad_cfc)
       call sync_param("PIratio_N2O",PIratio_N2O)

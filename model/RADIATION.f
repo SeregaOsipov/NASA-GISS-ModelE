@@ -156,11 +156,13 @@ C----------------
 !@var FSTOPX,FTTOPX switches on/off aerosol for diagnostics (solar,thermal component)
 !@var FSTASC,FTTASC scales optional aerosols (solar,thermal component)
       REAL*8    :: FSTOPX(ITRMAX),FTTOPX(ITRMAX)
+!osipov, include SO2, chem_in should have same size as fulgas var
 !@var chem_IN column variable for importing ozone(1) and methane(2)
 !@+   fields from rest of model
 !@var use_tracer_chem:set U0GAS(L, )=chem_IN( ,L), L=L1,use_tracer_chem( )
-      REAL*8 :: chem_IN(2,LX)
-      INTEGER :: use_tracer_chem(2),use_o3_ref=0
+!osipov increase the size 2 -> 3 to include SO2
+      REAL*8 :: chem_IN(3,LX)
+      INTEGER :: use_tracer_chem(3),use_o3_ref=0
       LOGICAL*4 :: flags
 !@var LOC_CHL local chlorophyll value (unit?) for albedo calculation (optional)
       REAL*8    :: LOC_CHL
@@ -2526,6 +2528,13 @@ C****
       chem_out(:,4)=ULGAS(:,7) ! climatological CH4 saved for chemistry
       if(use_tracer_chem(2) > 0) ! allow use of tracer CH4.
      * ULGAS(1:use_tracer_chem(2),7)=chem_IN(2,1:use_tracer_chem(2))
+     
+!osipov, include the so2     
+!osipov //TODO: presrcibe the use_tracer_chem for SO2
+!osipov //TODO: presrcibe the chem_in for SO2
+      if(use_tracer_chem(3) > 0) ! use the interactively computed SO2
+        ULGAS(1:use_tracer_chem(3),13)=chem_IN(3,1:use_tracer_chem(3))
+      endif
 
       IF(MRELAY > 0) THEN          ! for offline use only
         IF(NO3COL > 0)             ! rescale ozone to col.amount RO3COL
