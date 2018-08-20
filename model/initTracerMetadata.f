@@ -572,7 +572,7 @@
      &     PIratio_CO_S,PIratio_other,allowSomeChemReinit,
      &     CH4ICIN,CH4ICX,CH4ICINL,CH4ICL,
      &     COICIN,COIC,COICINL,COICL,Lmax_rad_O3,Lmax_rad_CH4
-     !osipov add SO2
+!osipov add SO2
      &     ,Lmax_rad_SO2
      &     ,BrOxaltIN,ClOxaltIN,ClONO2altIN,HClaltIN,BrOxalt,
      &     ClOxalt,ClONO2alt,HClalt,N2OICIN,N2OICX,N2OICINL,N2OICL,

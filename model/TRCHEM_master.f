@@ -2254,10 +2254,10 @@ c (radiation code wants atm-cm units):
      
 !osipov add the SO2
 !osipov, //TODO: check units, SO2 vs CH4
-			chem_tracer_save(3,L,i,j)=(trm(i,j,L,n_SO2) +
-			&      (tr3Dsource(i,j,L,nChemistry,n_SO2) + 
-			&      tr3Dsource(i,j,L,nOverwrite,n_SO2))*dtsrc)
-			&      *byaxyp(i,j)*avog/(tr_mm(n_SO2)*2.69e20)
+            chem_tracer_save(3,L,i,j)=(trm(i,j,L,n_SO2) +
+     &      (tr3Dsource(i,j,L,nChemistry,n_SO2) + 
+     &      tr3Dsource(i,j,L,nOverwrite,n_SO2))*dtsrc)
+     &      *byaxyp(i,j)*avog/(tr_mm(n_SO2)*2.69e20)
           end do
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
           strato3_tracer_save(1:LM,i,j)=(trm(i,j,1:LM,n_stratOx) +
