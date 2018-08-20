@@ -1721,6 +1721,8 @@ C     OUTPUT DATA
 #endif  /* BC_ALB */
 #ifdef TRACERS_SPECIAL_Shindell
       USE TRCHEM_Shindell_COM, only: Lmax_rad_O3,Lmax_rad_CH4
+!osipov add SO2
+     *     ,Lmax_rad_SO2
 #endif /* TRACERS_SPECIAL_Shindell */
 #ifdef TRACERS_TOMAS
       USE TOMAS_AEROSOL, only: icomp
