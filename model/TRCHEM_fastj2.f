@@ -5,7 +5,7 @@
       USE DOMAIN_DECOMP_ATM, only: write_parallel 
       use constant, only: pO2
       use RAD_COM, only: o2x
-      use dictionary_mod, only : get_param
+      use dictionary_mod, only : get_param, sync_param
 #ifdef TRACERS_ON
       use RAD_COM, only: njaero
 #endif
@@ -1377,7 +1377,7 @@ C**** Local parameters and variables and arguments:
       allocate( FTAU(NCFASTJ2+1) )
       
       !osipov
-      call get_param( "so2_j_feedback", so2_j_feedback )
+      call sync_param( "so2_j_feedback", so2_j_feedback )
     
 C---Pick nearest Mie wavelength, no interpolation--------------
                              KM=1
@@ -1406,7 +1406,6 @@ C---Set up total optical depth over each CTM level, DTAUX:
       do J=J1,NBFASTJ
         XLO3=DO32(J)*XQO3_2(J)
         XLO2=DMFASTJ2(J)*XQO2_2(J)*pO2*o2x
-        !osipov //TODO: check how OD is computed
         XLSO2=dso22(J)*XQSO2_2(J)
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
         if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
@@ -2256,8 +2255,6 @@ C Read O2 X-sects, O3 X-sects, O3=>O(1D) quant yields(each at 3 temps):
 
       !osipov also read the SO2 into separate variable
       !osipov, otherwise the questionable logic of 3 index shift will break 
-      !osipov //TODO: put actual SO2 data into the jv_spec_AV_X68d_osipov.dat
-      !osipov, //TODO: fix the format of the data
       K=1
       READ(NJ1,103) titlej_so2(K,1),tqq_so2(K,1), (QSO2(IW,K),IW=1,NWWW)
       

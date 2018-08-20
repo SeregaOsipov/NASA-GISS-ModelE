@@ -685,7 +685,6 @@ C**** set super saturation parameter for isotopes if needed
       call sync_param("Lmax_rad_O3",Lmax_rad_O3)
       call sync_param("Lmax_rad_CH4",Lmax_rad_CH4)
       !osipov add SO2
-      !osipov //TODO: check the value in the debugger and *.R file
       call sync_param("Lmax_rad_SO2",Lmax_rad_SO2)
       call sync_param("use_rad_n2o",use_rad_n2o)
       call sync_param("use_rad_cfc",use_rad_cfc)

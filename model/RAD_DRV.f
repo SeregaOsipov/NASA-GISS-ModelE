@@ -2687,12 +2687,12 @@ C**** Ozone and Methane:
       CHEM_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM
       !osipov add SO2
       !osipov //TODO: check conversation units
+      !osipov //TODO: so2 seems to be zero
       chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
       if (clim_interact_chem > 0) then
         use_tracer_chem(1)=Lmax_rad_O3  ! O3
         use_tracer_chem(2)=Lmax_rad_CH4 ! CH4
         !osipov add SO2
-        !osipov //TODO: add the variable
         use_tracer_chem(3)=Lmax_rad_SO2 ! SO2
       endif
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
