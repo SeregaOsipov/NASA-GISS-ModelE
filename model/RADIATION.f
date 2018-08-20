@@ -576,6 +576,7 @@ C-------------------------
 C     Scaling/kill factors
 C-------------------------
 
+!osipov, turn on the SO2 
 !@var FULGAS scales the various atmospheric constituents:
 !@+         H2O CO2 O3 O2 NO2 N2O CH4 F11 F12 N2C CFC11 CFC12 SO2
 !@+   Note: FULGAS(1) only acts in the stratosphere (unless LS1_loc=1)
@@ -583,7 +584,7 @@ C-------------------------
 
 C      H2O CO2  O3  O2 NO2 N2O CH4 F11 F12 N2C CFC11+ CFC12+ SO2
 C        1   2   3   4   5   6   7   8   9  10    11     12   13
-     +   1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,   1.,    1.,  0./)
+     +   1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,   1.,    1.,  1./)
 #ifdef ALTER_RADF_BY_LAT
 !@var FULGAS_orig saves initial FULGAS values
       REAL*8, dimension(13) :: FULGAS_orig
