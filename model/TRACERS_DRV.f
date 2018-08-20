@@ -5917,6 +5917,12 @@ c**** earth
           do l=1,lm; do j=J_0,J_1; do i=I_0,I_1
             trm(i,j,l,n) = MA(l,i,j)*axyp(i,j)*vol2mass(n)*5.d-14
           end do; end do; end do
+!osipov add so2        	  
+        case('SO2')        	  
+          do l=1,lm; do j=J_0,J_1; do i=I_0,I_1
+            chem_tracer_save(3,L,I,J)=trm(I,J,L,n)
+     &          *byaxyp(i,j)*avog/(tr_mm(n)*2.69e20) ! to atm*cm
+          end do   ; end do   ; end do
 #endif
 #ifdef TRACERS_TOMAS
         case('SO2','NH3','NH4','H2SO4','SOAgas','H2O2_s')
