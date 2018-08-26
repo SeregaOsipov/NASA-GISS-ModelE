@@ -1848,6 +1848,12 @@ C  GHG Effective forcing relative to 1850
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
      &    ,snfst_stratOx,tnfst_stratOx
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
+
+!osipov, SO2 online diags
+      REAL*8,DIMENSION(2,grid%I_STRT_HALO:grid%I_STOP_HALO,
+	 &                   grid%J_STRT_HALO:grid%J_STOP_HALO,lm_req) ::
+     &					lwhr
+
 #ifdef BC_ALB
       REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
      &                 grid%J_STRT_HALO:grid%J_STOP_HALO) ::
@@ -2688,8 +2694,6 @@ C**** Ozone and Methane:
       CHEM_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)
       CHEM_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM
       !osipov add SO2
-      !osipov //TODO: check conversation units
-      !osipov //TODO: so2 seems to be zero
       chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
       if (clim_interact_chem > 0) then
         use_tracer_chem(1)=Lmax_rad_O3  ! O3
@@ -2793,9 +2797,16 @@ C**** Ozone:
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
         chem_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)  ! Ozone
         chem_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM  ! Methane
+
+        !osipov, SO2 diags, heating rates
+        chem_IN(3,1:LM)=0 ! SO2
+		CALL RCOMPX
+		lwhr(1,I,J,:)=TRFCRL(:)
         !osipov add SO2
-        !osipov //TODO: check conversation units
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
+		CALL RCOMPX
+		lwhr(2,I,J,:)=TRFCRL(:)
+		
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS
 ! TOA GHG rad forcing: nf=1,4 are CH4, N2O, CFC11, and CFC12:
