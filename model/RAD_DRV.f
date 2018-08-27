@@ -58,6 +58,8 @@ C****
      *     ,KYEARO,KJDAYO,MADO3M, KYEARA,KJDAYA,MADAER
      *     ,KYEARD,KJDAYD,MADDST, KYEARV,KJDAYV,MADVOL
      *     ,KYEARE,KJDAYE,MADEPS, KYEARR,KJDAYR
+!osipov, add SO2
+     *     ,LX
 !g95     *     ,FSXAER,FTXAER    ! scaling (on/off) for default aerosols
      *     ,ITR,nraero_aod=>NTRACE ! turning on options for extra aerosols
      *     ,FS8OPX,FT8OPX, TRRDRY,KRHTRA,TRADEN,REFDRY
@@ -1851,8 +1853,8 @@ C  GHG Effective forcing relative to 1850
 
 !osipov, SO2 online diags
       REAL*8,DIMENSION(2,grid%I_STRT_HALO:grid%I_STOP_HALO,
-	 &                   grid%J_STRT_HALO:grid%J_STOP_HALO,lm_req) ::
-     &					lwhr
+     &                   grid%J_STRT_HALO:grid%J_STOP_HALO,LX) ::
+     &     lwhr
 
 #ifdef BC_ALB
       REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
