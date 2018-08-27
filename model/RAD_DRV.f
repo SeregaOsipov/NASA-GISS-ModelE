@@ -2810,7 +2810,7 @@ C**** Ozone:
         !osipov add SO2
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
         CALL RCOMPX
-        lwhr_so2(I,J,:)=lwhr_so2-TRHR(:,I,J)*bysha*byMA(:,I,J)
+        lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-TRHR(:,I,J)*bysha*byMA(:,I,J)
 
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS
