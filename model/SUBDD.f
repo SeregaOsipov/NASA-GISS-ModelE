@@ -2487,6 +2487,14 @@ c
      &  units = 'K/day',
      &  sched = sched_rad
      &     )
+      
+! osipov, add different lwhr diagnostics such as no SO2 and so on 
+      arr(next()) = info_type_(
+     &  sname = 'lwhr_diags',
+     &  lname = 'Longwave Radiative Heating Rate diags',
+     &  units = 'K/day',
+     &  sched = sched_rad
+     &     )      
 c
 c  indirect effect diagnostics
 c
