@@ -1635,9 +1635,9 @@ C     OUTPUT DATA
 #ifdef mjo_subdd
      *     ,SWHR,LWHR,SWHR_cnt,LWHR_cnt,OLR_acc,OLR_cnt
      *     ,swu_avg,swu_cnt
+#endif
 !osipov add lwhr diags
      *     ,lwhr_so2
-#endif
 #ifdef ALTER_RADF_BY_LAT
      *     ,FULGAS_lat,FS8OPX_lat,FT8OPX_lat
 #endif
