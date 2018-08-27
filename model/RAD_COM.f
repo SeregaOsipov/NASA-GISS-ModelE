@@ -103,13 +103,13 @@ C**** does not produce exactly the same as the default values.
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:) :: SWHR,LWHR
       REAL*8 :: SWHR_cnt = 0.d0
       REAL*8 :: LWHR_cnt = 0.d0
-!osipov add so2 contribution to HR
-!@var LWHR_so2 longwave heating rates for SUBDD (C/d)
-      REAL*8,ALLOCATABLE,DIMENSION(:,:,:) :: LWHR_so2
 !@var swu_avg,swu_cnt -- upward shortwave fluxes at srf for SUBDD (C/d)
       REAL*8,ALLOCATABLE,DIMENSION(:,:) :: swu_avg
       REAL*8 :: swu_cnt = 0.d0
 #endif
+!osipov add so2 contribution to HR
+!@var LWHR_so2 longwave heating rates for SUBDD (C/d)
+      REAL*8,ALLOCATABLE,DIMENSION(:,:,:) :: LWHR_so2
 #ifdef TRACERS_ON
 
 !@var DIAG_FC Controls the number of radiation calls for the calculation of
@@ -382,9 +382,9 @@ C**** Local variables initialised in init_RAD
 #ifdef mjo_subdd
      *     ,SWHR_cnt,LWHR_cnt,SWHR,LWHR,OLR_acc,OLR_cnt
      *     ,swu_avg,swu_cnt
+#endif
 !osipov add so2 diags
      *     ,LWHR_so2
-#endif
 #ifdef CUBED_SPHERE
      &     ,JM_DH2O
 #endif
@@ -441,10 +441,10 @@ C**** Local variables initialised in init_RAD
      *     OLR_acc(I_0H:I_1H,J_0H:J_1H),
      *     SWHR(I_0H:I_1H,J_0H:J_1H,Lm),
      *     LWHR(I_0H:I_1H,J_0H:J_1H,Lm),
-!osipov add so2 diags     
-     *     LWHR_so2(I_0H:I_1H,J_0H:J_1H,Lm),
      *     swu_avg(I_0H:I_1H,J_0H:J_1H),
 #endif
+!osipov add so2 diags     
+     *     LWHR_so2(I_0H:I_1H,J_0H:J_1H,Lm),
 #ifdef TRACERS_SPECIAL_Shindell
 #endif
      *     STAT=IER)
