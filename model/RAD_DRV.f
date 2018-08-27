@@ -2803,14 +2803,18 @@ C**** Ozone:
 
         !osipov, SO2 diags, heating rates
         chem_IN(3,1:LM)=0 ! SO2
-		CALL RCOMPX
-		!convert W/m^2 to K/day
-		lwhr_diags(1,I,J,:)=TRFCRL(:)*bysha*byMA(L,I,J)
+        CALL RCOMPX
+        lwhr_diags(1,I,J,:)=TRHR(:,I,J)*bysha*byMA(:,I,J)
+!            DO L=1,LM
+              !convert W/m^2 to K/day
+!              lwhr_diags(1,I,J,L)=TRFCRL(L)*bysha*byMA(L,I,J)
+!            end do
         !osipov add SO2
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
-		CALL RCOMPX
-		lwhr_diags(2,I,J,:)=TRFCRL(:)*bysha*byMA(L,I,J)
-		
+        CALL RCOMPX
+        lwhr_diags(1,I,J,:)=TRHR(:,I,J)*bysha*byMA(:,I,J)
+!        lwhr_diags(2,I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)
+
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS
 ! TOA GHG rad forcing: nf=1,4 are CH4, N2O, CFC11, and CFC12:
