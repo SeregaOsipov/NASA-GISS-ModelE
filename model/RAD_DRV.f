@@ -1636,7 +1636,7 @@ C     OUTPUT DATA
      *     ,SWHR,LWHR,SWHR_cnt,LWHR_cnt,OLR_acc,OLR_cnt
      *     ,swu_avg,swu_cnt
 !osipov add lwhr diags
-     *     ,lwhr_diags
+     *     ,lwhr_so2
 #endif
 #ifdef ALTER_RADF_BY_LAT
      *     ,FULGAS_lat,FS8OPX_lat,FT8OPX_lat
@@ -1852,11 +1852,6 @@ C  GHG Effective forcing relative to 1850
 #if (defined SHINDELL_STRAT_EXTRA) && (defined ACCMIP_LIKE_DIAGS)
      &    ,snfst_stratOx,tnfst_stratOx
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
-
-!osipov, SO2 online diags
-      REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
-     &                   grid%J_STRT_HALO:grid%J_STOP_HALO,LM) ::
-     &     lwhr_so2
 
 #ifdef BC_ALB
       REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
@@ -2803,6 +2798,7 @@ C**** Ozone:
         chem_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM  ! Methane
 
         !osipov, SO2 diags, heating rates
+        !osipov, //TODO: check that the place to compute the diagnostic is right
         chem_IN(3,1:LM)=0 ! SO2
         CALL RCOMPX
         !convert W/m^2 to K/day
@@ -3940,9 +3936,6 @@ c longwave GHG forcing at TOA
        SWHR(I,J,L)=SWHR(I,J,L)+
      *             SRHR(L,I,J)*COSZ2(I,J)*bysha*byMA(L,I,J)
        LWHR(I,J,L)=LWHR(I,J,L)+TRHR(L,I,J)*bysha*byMA(L,I,J)
-!osipov add lwhr diags
-!//TODO: use proper array
-       LWHR_diags(I,J,L)=LWHR_diags(I,J,L)+TRHR(L,I,J)*bysha*byMA(L,I,J)
 #endif
       END DO
       END DO
