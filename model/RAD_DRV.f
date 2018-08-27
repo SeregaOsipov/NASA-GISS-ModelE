@@ -1634,8 +1634,9 @@ C     OUTPUT DATA
      *     ,chl_from_obio,chl_from_seawifs
 #ifdef mjo_subdd
      *     ,SWHR,LWHR,SWHR_cnt,LWHR_cnt,OLR_acc,OLR_cnt
-!osipov add lwhr diags     
-     *     ,swu_avg,swu_cnt, lwhr_diags 
+     *     ,swu_avg,swu_cnt
+!osipov add lwhr diags
+     *     ,lwhr_diags
 #endif
 #ifdef ALTER_RADF_BY_LAT
      *     ,FULGAS_lat,FS8OPX_lat,FT8OPX_lat
@@ -1853,9 +1854,9 @@ C  GHG Effective forcing relative to 1850
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
 
 !osipov, SO2 online diags
-      REAL*8,DIMENSION(2,grid%I_STRT_HALO:grid%I_STOP_HALO,
-     &                   grid%J_STRT_HALO:grid%J_STOP_HALO,lm_req) ::
-     &     lwhr_diags
+      REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
+     &                   grid%J_STRT_HALO:grid%J_STOP_HALO,LM) ::
+     &     lwhr_so2
 
 #ifdef BC_ALB
       REAL*8,DIMENSION(grid%I_STRT_HALO:grid%I_STOP_HALO,
@@ -2804,16 +2805,12 @@ C**** Ozone:
         !osipov, SO2 diags, heating rates
         chem_IN(3,1:LM)=0 ! SO2
         CALL RCOMPX
-        lwhr_diags(1,I,J,:)=TRHR(:,I,J)*bysha*byMA(:,I,J)
-!            DO L=1,LM
-              !convert W/m^2 to K/day
-!              lwhr_diags(1,I,J,L)=TRFCRL(L)*bysha*byMA(L,I,J)
-!            end do
+        !convert W/m^2 to K/day
+        lwhr_so2(I,J,:)=TRHR(:,I,J)*bysha*byMA(:,I,J)
         !osipov add SO2
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
         CALL RCOMPX
-        lwhr_diags(1,I,J,:)=TRHR(:,I,J)*bysha*byMA(:,I,J)
-!        lwhr_diags(2,I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)
+        lwhr_so2(I,J,:)=lwhr_so2-TRHR(:,I,J)*bysha*byMA(:,I,J)
 
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS

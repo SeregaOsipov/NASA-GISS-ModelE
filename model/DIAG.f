@@ -3479,6 +3479,9 @@ C**** accumulating/averaging mode ***
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate'
               qinstant = .false.
+
+              !osipov //TODO: add the LWH for so2 maybe?
+              
 #endif
 
 #ifdef TRACERS_HETCHEM
