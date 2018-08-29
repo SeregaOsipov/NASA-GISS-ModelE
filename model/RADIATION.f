@@ -2531,8 +2531,6 @@ C****
      * ULGAS(1:use_tracer_chem(2),7)=chem_IN(2,1:use_tracer_chem(2))
      
 !osipov, include the so2     
-!osipov //TODO: presrcibe the use_tracer_chem for SO2
-!osipov //TODO: presrcibe the chem_in for SO2
       if(use_tracer_chem(3) > 0) then ! use the interactively computed SO2
         ULGAS(1:use_tracer_chem(3),13)=chem_IN(3,1:use_tracer_chem(3))
       endif
