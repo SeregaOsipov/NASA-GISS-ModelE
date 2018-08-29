@@ -1362,10 +1362,12 @@ C****
 #ifdef mjo_subdd
       subroutine surface_diag_mjo
       USE CONSTANT, only : undef
-      USE MODEL_COM, only : lm
+!osipov SUBDD bug fix
+      USE resolution, only : lm
       USE ATM_COM, only : phi,MWs
       USE DIAG_COM, only :
-     *     ,PW_acc, E_acc,sst_avg,p_avg,lwu_avg
+!osipov SUBDD bug fix
+     *     PW_acc, E_acc,sst_avg,p_avg,lwu_avg
      *     ,u_avg,v_avg,w_avg,t_avg,q_avg,r_avg,z_avg
       implicit none
 C**** Accumulate subdaily precipitable water (kg/m^2) PW_acc ***
