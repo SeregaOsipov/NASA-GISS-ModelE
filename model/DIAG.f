@@ -2015,6 +2015,15 @@ C**** accumulating/averaging mode ***
           datar8=atmsrf%vsavg
             units_of_data = 'm/s'
             long_name = 'V Component of Surface Air Velocity'
+            
+!osipov, add instanteneous SO2 heating rates
+        case ("lwhr")
+          datar8(:,:)=lwhr_so2(:,:,l)
+          LWHR(:,:,l)=0.
+          IF (l.eq.LmaxSUBDD) LWHR_cnt=0.
+          units_of_data = 'K/day'
+          long_name = 'Longwave Radiative Heating Rate'
+          qinstant = .false.
         case ("SST")            ! sea surface temp (C)
           do j=J_0,J_1
             do i=I_0,imaxj(j)
