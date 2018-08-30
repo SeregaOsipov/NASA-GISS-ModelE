@@ -2564,7 +2564,8 @@ C****
       end subroutine calc_gasexch
 #endif /* TRACERS_GASEXCH_ocean */
 
-#ifdef CACHED_SUBDD
+!osipov
+!#ifdef CACHED_SUBDD
       subroutine sijlh_defs(arr,nmax,decl_count)
 c
 c 3D outputs
@@ -2611,4 +2612,5 @@ c
       next = decl_count
       end function next
       end subroutine sijlh_defs
-#endif
+!osipov
+!#endif

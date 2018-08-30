@@ -2489,12 +2489,12 @@ c
      &     )
       
 ! osipov, add lwhr of the SO2 
-      arr(next()) = info_type_(
-     &  sname = 'lwhr_so2',
-     &  lname = 'Longwave Radiative Heating Rate of the SO2',
-     &  units = 'K/day',
-     &  sched = sched_rad
-     &     )      
+!      arr(next()) = info_type_(
+!     &  sname = 'lwhr_so2',
+!     &  lname = 'Longwave Radiative Heating Rate of the SO2',
+!     &  units = 'K/day',
+!     &  sched = sched_rad
+!     &     )      
 c
 c  indirect effect diagnostics
 c

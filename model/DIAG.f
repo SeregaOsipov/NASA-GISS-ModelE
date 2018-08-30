@@ -1981,8 +1981,10 @@ C**** depending on namedd string choose what variables to output
         long_name = 'not yet set in get_subdd'
 
 C**** simple diags (one record per file)
-        select case (namedd(k))
-        case ("SLP")            ! sea level pressure (mb)
+!osipov bug fix
+!        select case (namedd(k))
+        select case (trim(namedd(k)))
+        case ("slp")            ! sea level pressure (mb)
           units_of_data = '10^2 Pa'
           long_name = 'Sea Level Pressure'
           do j=J_0,J_1
@@ -3386,14 +3388,16 @@ C**** get model level
 !===========
 
 C**** Additional diags - multiple records per file
-        select case (namedd(k))
+        select case (trim(namedd(k)))
 C**** cases using all levels up to LmaxSUBDD
           case ("SO2", "SO4", "SO4_d1", "SO4_d2", "SO4_d3", "Clay",
      *         "Silt1", "Silt2", "Silt3", "CTEM", "CL3D", "CI3D", "CD3D"
      *         , "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
-     *         "SWH","LWH","TDRY","SDRY","DDRY","LDRY",
+!osipov bug fix
+!osipov //TODO: add swhr_so2
+     *         "swhr","lwhr","TDRY","SDRY","DDRY","LDRY",
 #endif
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
@@ -3465,14 +3469,14 @@ C**** accumulating/averaging mode ***
               units_of_data = 'kg/kg/day'
               long_name = 'Drying by large-scale conden.'
               qinstant = .false.
-            case ("SWH")
+            case ("swhr")
               datar8(:,:)=SECONDS_PER_DAY*SWHR(:,:,l)/SWHR_cnt
               SWHR(:,:,l)=0.
               IF (l.eq.LmaxSUBDD) SWHR_cnt=0.
               units_of_data = 'K/day'
               long_name = 'Shortwave Radiative Heating Rate'
               qinstant = .false.
-            case ("LWH")
+            case ("lwhr")
               datar8(:,:)=SECONDS_PER_DAY*LWHR(:,:,l)/LWHR_cnt
               LWHR(:,:,l)=0.
               IF (l.eq.LmaxSUBDD) LWHR_cnt=0.
@@ -4306,25 +4310,29 @@ c time_subdd
 !@auth Jan Perlwitz
       use model_com, only: modelEclock
       use BaseTime_mod, only: BaseTime, newBaseTime
+      use TimeConstants_mod, only: INT_HOURS_PER_DAY
+      USE TimeInterval_mod
+      use Rational_mod
       implicit none
 
       integer,intent(in) :: rec
       logical,intent(in) :: q24
       integer :: year, month, date
       type (BaseTime) :: t
+      type (TimeInterval) :: sPerDay
 
-      call modelEclock%get(year=year, month=month,
-     &       date=date)
+      call modelEclock%get(year=year, month=month, date=date)
+      sPerDay = calendar%getSecondsPerDay()
+
       if (q24) then ! coordinate is #days
-        t = newBaseTime(
-     &       modelEclock%getTimeInSecondsFromDate(iyear1,month,date,0))
-        time_subdd = nint(t / calendar%getSecondsPerDay())
+!osipov bug fix
+        t = modelEclock%getTimeInSecondsFromDate(iyear1,month,date,0)
+        time_subdd = nint(real(t%Rational/sPerDay))
       else ! coordinate is #hours
-        t = newBaseTime(
-     &       modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
-     &        + (rec-1)*nsubdd*dtsrc)
-        time_subdd =
-     &       nint(t / (calendar%getSecondsPerDay()/INT_HOURS_PER_DAY))
+!osipov bug fix
+        t = modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
+        time_subdd = nint((real(t%Rational)+(rec-1)*nsubdd*dtsrc)
+     &               / (real(sPerDay)/INT_HOURS_PER_DAY))
       end if
 
       return

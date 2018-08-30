@@ -4732,7 +4732,8 @@ C****
       end
 #endif
 
-#ifdef CACHED_SUBDD
+!osipov bug fix
+!#ifdef CACHED_SUBDD
       subroutine rijh_defs(arr,nmax,decl_count)
 c
 c 2D outputs
@@ -4985,8 +4986,8 @@ c
       next = decl_count
       end function next
       end subroutine rijlh_defs
-
-#endif
+!osipov bug fix
+!#endif
 
       subroutine readIFile(IFile)
 ! Consolidated duplicate of MODELE.f code snippets that read the

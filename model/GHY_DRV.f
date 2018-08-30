@@ -4561,7 +4561,8 @@ c     *         +flake(i,j)*sum(w_ij(0:ngm,3,i,j) )*rhow
       fb = 1.d0 - fv
       end subroutine get_fb_fv
 
-#ifdef CACHED_SUBDD
+!osipov bug fix
+!#ifdef CACHED_SUBDD
       subroutine gijlh_defs(arr,nmax,decl_count)
 c 3D outputs (model horizontal grid on soil layers).
       use model_com, only : dtsrc,nday
@@ -4602,4 +4603,5 @@ c
       next = decl_count
       end function next
       end subroutine gijlh_defs
-#endif /* CACHED_SUBDD */
+!osipov
+!#endif /* CACHED_SUBDD */

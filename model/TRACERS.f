@@ -2338,7 +2338,8 @@ c daily_z is currently only needed for CS
       end subroutine tracerIo
      
 
-#ifdef CACHED_SUBDD
+!osipov
+!#ifdef CACHED_SUBDD
       subroutine tijh_defs(arr,nmax,decl_count)
 ! 2D tracer outputs (model horizontal grid).
 ! Each tracer output must be declared separately (no bundling).
@@ -2925,7 +2926,8 @@ C
       enddo ! igroup
 
       end subroutine accumCachedTracerSUBDDs
-#endif /* CACHED_SUBDD */
+!osipov
+!#endif /* CACHED_SUBDD */
 
 #if (defined TRACERS_SPECIAL_Shindell) || (defined TRACERS_AEROSOLS_Koch) ||\
     (defined TRACERS_AMP) || (defined TRACERS_TOMAS)

@@ -2639,7 +2639,8 @@ contains
 
 end subroutine qmom_topo_adjustments
 
-#ifdef CACHED_SUBDD
+!osipov
+!#ifdef CACHED_SUBDD
   subroutine cijh_defs(arr,nmax,decl_count)
   !
   ! 2D outputs
@@ -2765,5 +2766,6 @@ end subroutine qmom_topo_adjustments
   next = decl_count
   end function next
   end subroutine cijlh_defs
-#endif
+!osipov
+!#endif
 

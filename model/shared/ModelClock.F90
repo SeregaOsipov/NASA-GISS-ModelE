@@ -150,7 +150,9 @@ contains
     pCalendar => this%currentTime%calendar
     aTime = newTime(pCalendar)
     call aTime%setByDate(year, month, date, hour)
+!osipov bug fix
     seconds = newBaseTime(this%currentTime - aTime)
+!    seconds = this%currentTime - aTime
 
   end function getTimeInSecondsFromDate
 
