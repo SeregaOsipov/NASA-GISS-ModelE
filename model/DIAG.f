@@ -3407,6 +3407,12 @@ C**** cases using all levels up to LmaxSUBDD
 #endif
           do l=1,LmaxSUBDD
             select case(namedd(k))
+!osipov, add instanteneous SO2 heating rates            
+            case ("lwhr")
+              datar8(:,:)=TRHR(L,:,:)*bysha*byMA(L,:,:)
+              units_of_data = 'K/day'
+              long_name = 'Longwave Radiative Heating Rate'
+              qinstant = .true.
 !osipov, add instanteneous SO2 heating rates
             case ("lwhr_so2")
               datar8(:,:)=lwhr_so2(:,:,l)
