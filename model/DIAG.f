@@ -3398,8 +3398,10 @@ C**** cases using all levels up to LmaxSUBDD
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
 !osipov bug fix
-     *         "swhr","lwhr","lwhr_so2","TDRY","SDRY","DDRY","LDRY",
+     *         "swhr","lwhr","TDRY","SDRY","DDRY","LDRY",
 #endif
+!osipov so2 diags
+     *         "lwhr_so2",
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
 #ifdef mjo_subdd
