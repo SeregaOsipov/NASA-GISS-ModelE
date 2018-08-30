@@ -2015,15 +2015,6 @@ C**** accumulating/averaging mode ***
           datar8=atmsrf%vsavg
             units_of_data = 'm/s'
             long_name = 'V Component of Surface Air Velocity'
-            
-!osipov, add instanteneous SO2 heating rates
-        case ("lwhr")
-          datar8(:,:)=lwhr_so2(:,:,l)
-          LWHR(:,:,l)=0.
-          IF (l.eq.LmaxSUBDD) LWHR_cnt=0.
-          units_of_data = 'K/day'
-          long_name = 'Longwave Radiative Heating Rate'
-          qinstant = .false.
         case ("SST")            ! sea surface temp (C)
           do j=J_0,J_1
             do i=I_0,imaxj(j)
@@ -3405,8 +3396,7 @@ C**** cases using all levels up to LmaxSUBDD
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
 !osipov bug fix
-!osipov //TODO: add swhr_so2
-     *         "swhr","lwhr","TDRY","SDRY","DDRY","LDRY",
+     *         "swhr","lwhr","lwhr_so2","TDRY","SDRY","DDRY","LDRY",
 #endif
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
@@ -3415,6 +3405,12 @@ C**** cases using all levels up to LmaxSUBDD
 #endif
           do l=1,LmaxSUBDD
             select case(namedd(k))
+!osipov, add instanteneous SO2 heating rates
+            case ("lwhr_so2")
+              datar8(:,:)=lwhr_so2(:,:,l)
+              units_of_data = 'K/day'
+              long_name = 'Longwave Radiative Heating Rate of SO2'
+              qinstant = .true.
 
 #ifdef mjo_subdd
 C**** accumulating/averaging mode ***
