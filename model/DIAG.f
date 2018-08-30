@@ -1898,6 +1898,8 @@ c get_subdd
       use rad_com, only: OLR_acc,OLR_cnt,SWHR,LWHR,SWHR_cnt,LWHR_cnt
      &   ,swu_avg,swu_cnt
 #endif
+!osipov add so2 HR
+      use rad_com, only: lwhr_so2
 #ifdef TRACERS_ON
       use TRDIAG_COM, only: MMR_to_VMR
 #endif
