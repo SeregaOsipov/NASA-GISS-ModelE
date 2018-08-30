@@ -2802,11 +2802,12 @@ C**** Ozone:
         chem_IN(3,1:LM)=0 ! SO2
         CALL RCOMPX
         !convert W/m^2 to K/day
-        lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)
+        lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
         !osipov add SO2
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
         CALL RCOMPX
-        lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-TRFCRL(:)*bysha*byMA(:,I,J)
+        lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
+     &                  TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
 
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS

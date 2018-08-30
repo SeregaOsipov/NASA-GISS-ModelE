@@ -3397,11 +3397,10 @@ C**** cases using all levels up to LmaxSUBDD
      *         , "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
-!osipov bug fix
-     *         "swhr","lwhr","TDRY","SDRY","DDRY","LDRY",
+     *         "swhr","TDRY","SDRY","DDRY","LDRY",
 #endif
 !osipov so2 diags
-     *         "lwhr_so2",
+     *         "lwhr_so2","lwhr",
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
 #ifdef mjo_subdd
@@ -3409,10 +3408,15 @@ C**** cases using all levels up to LmaxSUBDD
 #endif
           do l=1,LmaxSUBDD
             select case(namedd(k))
-!osipov, add instanteneous SO2 heating rates
-!osipov //TODO: remember that there is one more lwhr case below
+!osipov, add instanteneous SW & LW heating rates            
+!            case ("swhr")
+!              datar8(:,:)=SRHR(L,:,:)*COSZ2(:,:)*bysha*byMA(L,:,:)
+!              units_of_data = 'K/day'
+!              long_name = 'Shortwavei Radiative Heating Rate'
+!              qinstant = .true.
             case ("lwhr")
-              datar8(:,:)=TRHR(L,:,:)*bysha*byMA(L,:,:)
+!osipov //TODO: I could reuse the existing logic for the LWHR, but it is accumulated variable
+              datar8(:,:)=TRHR(L,:,:)*bysha*byMA(L,:,:)*SECONDS_PER_DAY
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate'
               qinstant = .true.
