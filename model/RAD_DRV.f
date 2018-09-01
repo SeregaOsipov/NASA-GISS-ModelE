@@ -2796,6 +2796,8 @@ C**** Ozone:
 #endif /* SHINDELL_STRAT_EXTRA && ACCMIP_LIKE_DIAGS */
         chem_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)  ! Ozone
         chem_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM  ! Methane
+!osipov, include SO2
+        chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
 
         !osipov, //TODO: check that the place to compute the diagnostic is right
         !osipov, turn the SO2 lw feedback off and on to get heating rates diag
@@ -2805,7 +2807,6 @@ C**** Ozone:
         lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
         !osipov //TODO: I'm overriding here old value with 1
         fulgas(13) = 1.
-        !chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
         CALL RCOMPX
         lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
      &                  TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
