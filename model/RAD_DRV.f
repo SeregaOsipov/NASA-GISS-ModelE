@@ -2797,14 +2797,15 @@ C**** Ozone:
         chem_IN(1,1:LM)=chem_tracer_save(1,1:LM,I,J)  ! Ozone
         chem_IN(2,1:LM)=chem_tracer_save(2,1:LM,I,J)*CH4X_RADoverCHEM  ! Methane
 
-        !osipov, SO2 diags, heating rates
         !osipov, //TODO: check that the place to compute the diagnostic is right
-        chem_IN(3,1:LM)=0 ! SO2
+        !osipov, turn the SO2 lw feedback off and on to get heating rates diag
+        fulgas(13) = 0.
         CALL RCOMPX
         !convert W/m^2 to K/day
         lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
-        !osipov add SO2
-        chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
+        !osipov //TODO: I'm overriding here old value with 1
+        fulgas(13) = 1.
+        !chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
         CALL RCOMPX
         lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
      &                  TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
