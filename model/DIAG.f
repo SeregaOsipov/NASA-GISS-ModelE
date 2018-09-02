@@ -4340,17 +4340,24 @@ c time_subdd
       integer :: year, month, date
       type (BaseTime) :: t
       type (TimeInterval) :: sPerDay
+      
+      !osipov bug fix
+      integer :: year1,mon1,day1,jdate1,hour1
+      character(len=4) :: amon1
 
       call modelEclock%get(year=year, month=month, date=date)
       sPerDay = calendar%getSecondsPerDay()
 
       if (q24) then ! coordinate is #days
-!osipov bug fix
+        !osipov bug fix
         t = modelEclock%getTimeInSecondsFromDate(iyear1,month,date,0)
         time_subdd = nint(real(t%Rational/sPerDay))
       else ! coordinate is #hours
-!osipov bug fix
-        t = modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
+        !osipov bug fix
+        call getdte(itu,nday,iyear1,year1,mon1,day1,jdate1,hour1,amon1)
+        t = modelEclock%getTimeInSecondsFromDate(iyear1,mon1,day1,hour1)
+        
+        !t = modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
         time_subdd = nint((real(t%Rational)+(rec-1)*nsubdd*dtsrc)
      &               / (real(sPerDay)/INT_HOURS_PER_DAY))
       end if
