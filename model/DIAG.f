@@ -4354,7 +4354,9 @@ c time_subdd
         time_subdd = nint(real(t%Rational/sPerDay))
       else ! coordinate is #hours
         !osipov bug fix
-        call getdte(itu,nday,iyear1,year1,mon1,day1,jdate1,hour1,amon1)
+        !osipov //TODO: there is still bug with the time
+        call getdte(nsubdd-1,nday,iyear1,year1,mon1,day1,
+     &              jdate1,hour1,amon1)
         t = modelEclock%getTimeInSecondsFromDate(iyear1,mon1,day1,hour1)
         
         !t = modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
