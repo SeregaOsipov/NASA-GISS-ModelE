@@ -2799,18 +2799,6 @@ C**** Ozone:
 !osipov, include SO2
         chem_IN(3,1:LM)=chem_tracer_save(3,1:LM,I,J) ! SO2
 
-        !osipov, //TODO: check that the place to compute the diagnostic is right
-        !osipov, turn the SO2 lw feedback off and on to get heating rates diag
-        fulgas(13) = 0.
-        CALL RCOMPX
-        !convert W/m^2 to K/day
-        lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
-        !osipov //TODO: I'm overriding here old value with 1
-        fulgas(13) = 1.
-        CALL RCOMPX
-        lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
-     &                  TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
-
 #ifdef ACCMIP_LIKE_DIAGS
 #ifndef SKIP_ACCMIP_GHG_RADF_DIAGS
 ! TOA GHG rad forcing: nf=1,4 are CH4, N2O, CFC11, and CFC12:
@@ -2937,12 +2925,26 @@ C**** second, net aerosols
 C**** End of initial computations for optional forcing diagnostics
 
 C**** Localize fields that are modified by RCOMPX
-      kdeliq(1:lm,1:4)=kliq(1:lm,1:4,i,j)
+kdeliq(1:lm,1:4)=kliq(1:lm,1:4,i,j)
+
+      !osipov, turn the SO2 lw feedback off and on to get heating rates diag
+      fulgas(13) = 0.
+      CALL RCOMPX
+      !convert W/m^2 to K/day
+      lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
+      !osipov, turn the so2 feedback on and use the main call
+      !osipov //TODO: I'm overriding here old value with 1
+      fulgas(13) = 1.
 
 C*****************************************************
 C     Main RADIATIVE computations, SOLAR and THERM(A)L
       CALL RCOMPX
 C*****************************************************
+
+      !osipov, compute the difference P-C
+      lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
+     &                TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
+
 
 #if (defined TRACERS_AEROSOLS_Koch) || (defined TRACERS_DUST) ||\
     (defined TRACERS_MINERALS) || (defined TRACERS_AMP) ||\
