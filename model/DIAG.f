@@ -3400,7 +3400,7 @@ C**** cases using all levels up to LmaxSUBDD
      *         "swhr","TDRY","SDRY","DDRY","LDRY",
 #endif
 !osipov so2 diags
-     *         "lwhr_so2","lwhr",
+     *         "lwhr_so2","lwhr","so2_ppmv"
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
 #ifdef mjo_subdd
@@ -3412,7 +3412,7 @@ C**** cases using all levels up to LmaxSUBDD
 !            case ("swhr")
 !              datar8(:,:)=SRHR(L,:,:)*COSZ2(:,:)*bysha*byMA(L,:,:)
 !              units_of_data = 'K/day'
-!              long_name = 'Shortwavei Radiative Heating Rate'
+!              long_name = 'Shortwave Radiative Heating Rate'
 !              qinstant = .true.
             case ("lwhr")
 !osipov //TODO: I could reuse the existing logic for the LWHR, but it is accumulated variable
@@ -3426,6 +3426,12 @@ C**** cases using all levels up to LmaxSUBDD
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate of SO2'
               qinstant = .true.
+              !osipov, add instanteneous SO2 heating rates
+!            case ("so2_ppmv")
+!              datar8(:,:)=lwhr_so2(:,:,l)
+!              units_of_data = 'ppmv'
+!              long_name = 'SO2 volume mixing ratio'
+!              qinstant = .true.              
 
 #ifdef mjo_subdd
 C**** accumulating/averaging mode ***
@@ -3503,16 +3509,14 @@ C**** accumulating/averaging mode ***
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate'
               qinstant = .false.
-
-              !osipov //TODO: add the LWH for so2 maybe?
-              
 #endif
 
-#ifdef TRACERS_HETCHEM
+            !osipov extract SO2 from the ifdef below
             case ("SO2")
               datar8=trm(:,:,l,n_SO2)
               units_of_data = 'kg'
               long_name = 'Sulfur Dioxide Mass'
+#ifdef TRACERS_HETCHEM
             case ("SO4")
               datar8=trm(:,:,l,n_SO4)
               units_of_data = 'kg'
