@@ -2925,7 +2925,7 @@ C**** second, net aerosols
 C**** End of initial computations for optional forcing diagnostics
 
 C**** Localize fields that are modified by RCOMPX
-kdeliq(1:lm,1:4)=kliq(1:lm,1:4,i,j)
+      kdeliq(1:lm,1:4)=kliq(1:lm,1:4,i,j)
 
       !osipov, turn the SO2 lw feedback off and on to get heating rates diag
       fulgas(13) = 0.

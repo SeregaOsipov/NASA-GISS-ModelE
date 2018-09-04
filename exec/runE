@@ -87,8 +87,8 @@ echo "#!/bin/bash" > $run_command
 echo "#SBATCH --job-name=modelE" >> $run_command
 echo "#SBATCH --partition=workq" >> $run_command
 echo "#SBATCH --ntasks-per-node=32" >> $run_command
-#echo "#SBATCH --time=1440:00" >> $run_command
-echo "#SBATCH --time=60:00" >> $run_command
+echo "#SBATCH --time=1440:00" >> $run_command
+#echo "#SBATCH --time=60:00" >> $run_command
 echo "#SBATCH --mail-type=FAIL" >> $run_command
 echo "#SBATCH --mail-user=Sergey.Osipov@kaust.edu.sa" >> $run_command
 echo "echo 'qsub script started'" >> $run_command
