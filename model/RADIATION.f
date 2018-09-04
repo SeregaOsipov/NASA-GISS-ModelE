@@ -1837,12 +1837,7 @@ C--------------------------------
         endif
       endif
       
-      !osipov, include the interactive so2     
-      !osipov //TODO: check why in line 2524 they multiply by some pressure ratio
-      if(use_tracer_chem(3) > 0) then ! use the interactively computed SO2
-        U0GAS(1:use_tracer_chem(3),13)=chem_IN(3,1:use_tracer_chem(3))
-      endif
-                      CALL GETGAS
+      CALL GETGAS
       else
         CALL TAUGAS
       endif
@@ -2529,9 +2524,16 @@ C****
       IF(KPGRAD > 0) PARTTG=PARTTG*(1.D0+0.5D0*PPGRAD(K)*SINLAT(JLAT))
       ULGAS(L,K)=U0GAS(L,K)*FULGAS(K)*PARTTG
   339 CONTINUE
+      !osipov, this line is preseved but the value is overrided below
       ULGAS(L,13)=U0GAS(L,13)*FULGAS(13)
   340 CONTINUE
 
+      !osipov, include the interactive so2     
+      if(use_tracer_chem(3) > 0) then ! use the interactively computed SO2
+        ULGAS(1:use_tracer_chem(3),13)=chem_IN(3,1:use_tracer_chem(3))
+     &                                 *FULGAS(13)
+      endif  
+  
       chem_out(:,4)=ULGAS(:,7) ! climatological CH4 saved for chemistry
       if(use_tracer_chem(2) > 0) ! allow use of tracer CH4.
      * ULGAS(1:use_tracer_chem(2),7)=chem_IN(2,1:use_tracer_chem(2))
