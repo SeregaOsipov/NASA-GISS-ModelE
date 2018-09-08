@@ -3516,11 +3516,13 @@ C**** accumulating/averaging mode ***
               datar8=trm(:,:,l,n_SO2)
               units_of_data = 'kg'
               long_name = 'Sulfur Dioxide Mass'
-#ifdef TRACERS_HETCHEM
+            !osipov extract SO4 from the ifdef below
             case ("SO4")
               datar8=trm(:,:,l,n_SO4)
               units_of_data = 'kg'
               long_name = 'Sulfate Mass'
+#ifdef TRACERS_HETCHEM
+            
             case ("SO4_d1")
               datar8=trm(:,:,l,n_SO4_d1)
               units_of_data = 'kg'

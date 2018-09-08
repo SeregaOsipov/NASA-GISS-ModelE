@@ -2927,23 +2927,26 @@ C**** End of initial computations for optional forcing diagnostics
 C**** Localize fields that are modified by RCOMPX
       kdeliq(1:lm,1:4)=kliq(1:lm,1:4,i,j)
 
-      !osipov, turn the SO2 lw feedback off and on to get heating rates diag
-      fulgas(13) = 0.
-      CALL RCOMPX
-      !convert W/m^2 to K/day
-      lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
-      !osipov, turn the so2 feedback on and use the main call
-      !osipov //TODO: I'm overriding here old value with 1
-      fulgas(13) = 1.
+      if ( SO2X > 0 ) then
+        !osipov, turn the SO2 lw feedback off and on to get heating rates diag
+        fulgas(13) = 0.
+        CALL RCOMPX
+        !convert W/m^2 to K/day
+        lwhr_so2(I,J,:)=TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
+        !osipov, turn the so2 feedback on and use the main call
+        fulgas(13) = SO2X
+      end if
 
 C*****************************************************
 C     Main RADIATIVE computations, SOLAR and THERM(A)L
       CALL RCOMPX
 C*****************************************************
 
-      !osipov, compute the difference P-C
-      lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
+      if ( SO2X > 0 ) then
+        !osipov, compute the SO2 diags from the double radiation call
+        lwhr_so2(I,J,:)=lwhr_so2(I,J,:)-
      &                TRFCRL(:)*bysha*byMA(:,I,J)*SECONDS_PER_DAY
+      end if
 
 
 #if (defined TRACERS_AEROSOLS_Koch) || (defined TRACERS_DUST) ||\
