@@ -1621,7 +1621,7 @@ C     OUTPUT DATA
      &          ,aesqex,aesqsc,aesqcb
      &          ,aesqex_dry,aesqsc_dry,aesqcb_dry
      &          ,SRXNIR,SRDNIR
-      USE RAD_COM, only : modrd,nrad
+      USE RAD_COM, only : modrd,nrad,so2x
       USE RAD_COM, only : rqt,srhr,trhr,fsf,cosz1,s0x,rsdist,nradfrc
      *     ,CH4X_RADoverCHEM,snoage
      *     ,plb0,shl0,tchg,alb,fsrdir,srvissurf,srdn,cfrac,rcld
