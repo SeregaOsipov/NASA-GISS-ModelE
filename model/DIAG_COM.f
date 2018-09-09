@@ -304,11 +304,12 @@ C**** parameters and variables for ISCCP diags
      *              400d0,  300d0,  250d0,  200d0,  150d0,  100d0,
      *               70d0,   50d0,   30d0,   20d0,   10d0,    5d0,
      *                1d0,   .5d0,   .1d0 /)
+!osipov rename p5 and p1 to 0.5 and 0.1, otherwise SUBDD fails to convert it to number
       CHARACTER*4, DIMENSION(KGZ_max), PARAMETER, public ::
      *  PMNAME= (/ '1000', '925 ', '850 ', '700 ', '600 ', '500 ',
      *             '400 ', '300 ', '250 ', '200 ', '150 ', '100 ',
      *             '70  ', '50  ', '30  ', '20  ', '10  ', '5   ',
-     *             '1   ', 'p5  ', 'p1  ' /)
+     *             '1   ', '0.5  ', '0.1  ' /)
 #ifdef TRACERS_SPECIAL_Shindell
 !@var O_inst saved instantaneous Ox tracer (at PMB lvls)
 !@var X_inst saved instantaneous NOx tracer (at PMB lvls)

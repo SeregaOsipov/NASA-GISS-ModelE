@@ -1850,6 +1850,14 @@ c get_subdd
       use TimeConstants_mod, only: SECONDS_PER_DAY
       USE RESOLUTION, only : lm
       Use ATM_COM,    Only: PEDN, ZATMO, U,V,T,Q
+!osipov include the sulfate indecies
+#ifdef TRACERS_AMP
+      USE TRACER_COM, only  : n_M_AKK_SU,n_M_ACC_SU,n_M_DD1_SU,
+     &                        n_M_DS1_SU,n_M_DD2_SU,n_M_DS2_SU,
+     &                        n_M_SSA_SU,n_M_OCC_SU,n_M_BC1_SU,
+     &                        n_M_BC2_SU,n_M_BC3_SU,n_M_DBC_SU,
+     &                        n_M_BOC_SU,n_M_BCS_SU,n_M_MXX_SU
+#endif
       USE GEOM, only : imaxj,axyp,byaxyp
 #ifdef ttc_subdd
      *                ,cosu,sinu,dxv,dyp,bydxyp
@@ -3019,7 +3027,8 @@ C**** get pressure level
               kgz_max_suffixes(kp)=trim(PMNAME(kp))//'_hPa'
               kgz_max_array(:,:,kp)=datar8
               data=datar8
-              call write_data(data,kunit,polefix)
+!osipov //TODO: temprorary comment out due to bug
+!              call write_data(data,kunit,polefix)
             end do
 #ifdef NEW_IO_SUBDD
             call write_subdd(trim(namedd(k)),kgz_max_array,polefix
@@ -3528,13 +3537,11 @@ C**** accumulating/averaging mode ***
               datar8=trm(:,:,l,n_SO2)
               units_of_data = 'kg'
               long_name = 'Sulfur Dioxide Mass'
-            !osipov extract SO4 from the ifdef below
+#ifdef TRACERS_HETCHEM
             case ("SO4")
               datar8=trm(:,:,l,n_SO4)
               units_of_data = 'kg'
-              long_name = 'Sulfate Mass'
-#ifdef TRACERS_HETCHEM
-            
+              long_name = 'Sulfate Mass'            
             case ("SO4_d1")
               datar8=trm(:,:,l,n_SO4_d1)
               units_of_data = 'kg'
