@@ -3399,6 +3399,10 @@ C**** cases using all levels up to LmaxSUBDD
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
      *         "swhr","TDRY","SDRY","DDRY","LDRY",
 #endif
+!osipov add the overall sulfate mass
+#ifdef TRACERS_AMP
+     *         "sulfate",
+#endif
 !osipov so2 diags
      *         "lwhr_so2","lwhr","so2_ppmv"
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
@@ -3427,11 +3431,19 @@ C**** cases using all levels up to LmaxSUBDD
               long_name = 'Longwave Radiative Heating Rate of SO2'
               qinstant = .true.
               !osipov, add instanteneous SO2 heating rates
-!            case ("so2_ppmv")
-!              datar8(:,:)=lwhr_so2(:,:,l)
-!              units_of_data = 'ppmv'
-!              long_name = 'SO2 volume mixing ratio'
-!              qinstant = .true.              
+            case ("sulfate")
+              datar8(:,:) =
+     &          trm(:,:,l,n_M_AKK_SU)+trm(:,:,l,n_M_ACC_SU)+
+     &          trm(:,:,l,n_M_DD1_SU)+trm(:,:,l,n_M_DS1_SU)+
+     &          trm(:,:,l,n_M_DD2_SU)+trm(:,:,l,n_M_DS2_SU)+
+     &          trm(:,:,l,n_M_SSA_SU)+trm(:,:,l,n_M_OCC_SU)+
+     &          trm(:,:,l,n_M_BC1_SU)+trm(:,:,l,n_M_BC2_SU)+
+     &          trm(:,:,l,n_M_BC3_SU)+trm(:,:,l,n_M_DBC_SU)+
+     &          trm(:,:,l,n_M_BOC_SU)+trm(:,:,l,n_M_BCS_SU)+
+     &          trm(:,:,l,n_M_MXX_SU)
+              units_of_data = 'kg'
+              long_name = 'Sulfate Mass overall'
+              qinstant = .true.    
 
 #ifdef mjo_subdd
 C**** accumulating/averaging mode ***
