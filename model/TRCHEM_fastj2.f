@@ -678,8 +678,10 @@ c Now do the rest of the aerosols
       if (aerosols_affect_photolysis == 1) then
         !osipov there is only one aerosol mixture and 2 clouds
         !osipov //TODO: currently it is sulfate optical depth, replace it with the mixture AOD
+        !osipov //TODO: check that it is actually the sulfate OD
         !osipov see the TRAMP_config for a list of aerosols, line 240
-        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+tau_as(NSLON,NSLAT,1:NLGCM,2)
+        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
+     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
       endif
 #endif
 
