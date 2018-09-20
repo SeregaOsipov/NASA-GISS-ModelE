@@ -1902,6 +1902,8 @@ c get_subdd
       USE GHY_COM, only : fearth,wearth,aiearth,soil_surf_moist
       USE RAD_COM, only : trhr,srhr,srdn,salb,cfrac,cosz1
      &     ,tausumw,tausumi
+     !osipov add the aerosol optical depth by modes
+     &     ,tau_as
 #ifdef mjo_subdd
       use rad_com, only: OLR_acc,OLR_cnt,SWHR,LWHR,SWHR_cnt,LWHR_cnt
      &   ,swu_avg,swu_cnt
@@ -3027,8 +3029,7 @@ C**** get pressure level
               kgz_max_suffixes(kp)=trim(PMNAME(kp))//'_hPa'
               kgz_max_array(:,:,kp)=datar8
               data=datar8
-!osipov //TODO: temprorary comment out due to bug
-!              call write_data(data,kunit,polefix)
+              call write_data(data,kunit,polefix)
             end do
 #ifdef NEW_IO_SUBDD
             call write_subdd(trim(namedd(k)),kgz_max_array,polefix
@@ -3408,9 +3409,9 @@ C**** cases using all levels up to LmaxSUBDD
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
      *         "swhr","TDRY","SDRY","DDRY","LDRY",
 #endif
-!osipov add the overall sulfate mass
+!osipov add the overall sulfate mass and AOD
 #ifdef TRACERS_AMP
-     *         "sulfate",
+     *         "sulfate", 'sulfate_aod'
 #endif
 !osipov so2 diags
      *         "lwhr_so2","lwhr","so2_ppmv"
@@ -3439,7 +3440,7 @@ C**** cases using all levels up to LmaxSUBDD
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate of SO2'
               qinstant = .true.
-              !osipov, add instanteneous SO2 heating rates
+!osipov, add instanteneous SO4 mass
             case ("sulfate")
               datar8(:,:) =
      &          trm(:,:,l,n_M_AKK_SU)+trm(:,:,l,n_M_ACC_SU)+
@@ -3452,6 +3453,12 @@ C**** cases using all levels up to LmaxSUBDD
      &          trm(:,:,l,n_M_MXX_SU)
               units_of_data = 'kg'
               long_name = 'Sulfate Mass overall'
+              qinstant = .true.    
+!osipov, add instanteneous SO4 optical depth
+            case ("sulfate")
+              datar8(:,:) = tau_as(:,:,l,1)+tau_as(:,:,l,2)
+              units_of_data = ''
+              long_name = 'sulfate (modes 1 and 2) optical depth'
               qinstant = .true.    
 
 #ifdef mjo_subdd
