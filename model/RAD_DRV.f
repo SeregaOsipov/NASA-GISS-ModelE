@@ -674,9 +674,9 @@ caer   KRHTRA=(/1,1,1,1,1,1,1,1/)
       njaero=nraero_aod+2
 #else
       njaero=2
-      !osipov, //TODO: looks like aerosol j feedback should always work for now, turn it on always
-      !osipov //TODO: do separate if for TRACERS_SPECIAL_Shindell v4 or smth
-      njaero=nraero_aod+2
+      !osipov, aerosol feedback on j, fastj2 only needs the optical properties of the mixture, thus only 1 extra aerosol
+      !osipov //TODO: this needs to be refactored and passed as argument in a subroutine call
+      njaero=1+2
 #endif
       allocate(miedx2(nbfastj,njaero))
       allocate(aer2(nbfastj,njaero))

@@ -290,8 +290,7 @@
 
       use atm_com, only: pedn,pmid
       use rad_com, only: nraero_koch,nraero_nitrate,nraero_dust,
-!osipov add amp aerosol
-     &                   nraero_seasalt, nraero_amp
+     &                   nraero_seasalt
       use domain_decomp_1d, only: am_i_root
       implicit none
 
@@ -399,13 +398,12 @@ c       19 = Ice Clouds
           n=n+nraero_dust
 #endif  /* TRACERS_DUST */
 
-!osipov matrix aerosol
+!osipov matrix aerosols
 #ifdef TRACERS_AMP
-          !osipov //TODO: check that indicies math matrix aerosols and SPECJ
-          MIEDX2(LL,n+1:n+nraero_amp)=
-     &      (/53+0,54+0,55+0,56+0,57+0,58+0,59+0/)
-
-          n=n+nraero_amp
+          !osipov //TODO: implement the mixture, for now it is only sulfate aerosol
+          !osipov, I've assigned now the sulfate aerosol, instead pass aod, ssa and g directly in fastj
+          MIEDX2(LL,n+1)= 13
+          n=n+1
 #endif
 
           MIEDX2(LL,n+1:njaero)=(/7+0,11+0/)
@@ -665,16 +663,25 @@ c  Add Aerosol Column - include aerosol (+cloud) types here.
 
 #ifdef TRACERS_ON
 
-c osipov bring back the aerosolf feedback on photolysis
-!#ifndef TRACERS_TOMAS
-!#ifndef TRACERS_AMP
+#ifndef TRACERS_TOMAS
+#ifndef TRACERS_AMP
 c Now do the rest of the aerosols
       if (aerosols_affect_photolysis == 1) then
         AER2(1:NLGCM,1:nraero_aod)=
      &    tau_as(NSLON,NSLAT,1:NLGCM,1:nraero_aod)
       endif
-!#endif
-!#endif
+#endif
+#endif
+
+!osipov aerosolf feedback on photolysis
+#ifdef TRACERS_AMP
+      if (aerosols_affect_photolysis == 1) then
+        !osipov there is only one aerosol mixture and 2 clouds
+        !osipov //TODO: currently it is sulfate optical depth, replace it with the mixture AOD
+        !osipov see the TRAMP_config for a list of aerosols, line 240
+        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+tau_as(NSLON,NSLAT,1:NLGCM,2)
+      endif
+#endif
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
