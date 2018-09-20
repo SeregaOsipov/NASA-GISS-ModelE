@@ -290,7 +290,8 @@
 
       use atm_com, only: pedn,pmid
       use rad_com, only: nraero_koch,nraero_nitrate,nraero_dust,
-     &                   nraero_seasalt
+!osipov add amp aerosol
+     &                   nraero_seasalt, nraero_amp
       use domain_decomp_1d, only: am_i_root
       implicit none
 
@@ -397,6 +398,15 @@ c       19 = Ice Clouds
      &       /)
           n=n+nraero_dust
 #endif  /* TRACERS_DUST */
+
+!osipov matrix aerosol
+#ifdef TRACERS_AMP
+          !osipov //TODO: check that indicies math matrix aerosols and SPECJ
+          MIEDX2(LL,n+1:n+nraero_amp)=
+     &      (/53+0,54+0,55+0,56+0,57+0,58+0,59+0/)
+
+          n=n+nraero_amp
+#endif
 
           MIEDX2(LL,n+1:njaero)=(/7+0,11+0/)
         enddo 
@@ -648,22 +658,23 @@ c  Calculate effective altitudes using scale height at each level
 c  osipov, integrate DSO22 vertically
       do LL=1,NLGCM
         !zfastj2 units are in cm, result is in #/cm^2
-    	DSO22(LL)=DSO22(LL)*(zfastj2(LL+1)-zfastj2(LL))
+        DSO22(LL)=DSO22(LL)*(zfastj2(LL+1)-zfastj2(LL))
       enddo
 
 c  Add Aerosol Column - include aerosol (+cloud) types here. 
 
 #ifdef TRACERS_ON
 
-#ifndef TRACERS_TOMAS
-#ifndef TRACERS_AMP
+c osipov bring back the aerosolf feedback on photolysis
+!#ifndef TRACERS_TOMAS
+!#ifndef TRACERS_AMP
 c Now do the rest of the aerosols
       if (aerosols_affect_photolysis == 1) then
         AER2(1:NLGCM,1:nraero_aod)=
      &    tau_as(NSLON,NSLAT,1:NLGCM,1:nraero_aod)
       endif
-#endif
-#endif
+!#endif
+!#endif
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
