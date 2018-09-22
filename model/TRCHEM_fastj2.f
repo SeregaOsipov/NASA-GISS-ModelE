@@ -45,7 +45,8 @@
      &                     ,nfastj=4
      &                     ,mfastj=1
      &                     ,mfit=2*M__
-     &                     ,nlfastj=4200
+!osipov, increase nlfastj 10 times due to extreme sulfate OD
+     &                     ,nlfastj=42000
      &                     ,njval=27 !formerly read in from jv_spec00_15.dat
      &                     ,nwfastj=18
      &                     ,np=60

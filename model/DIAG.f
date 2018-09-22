@@ -1902,7 +1902,7 @@ c get_subdd
       USE GHY_COM, only : fearth,wearth,aiearth,soil_surf_moist
       USE RAD_COM, only : trhr,srhr,srdn,salb,cfrac,cosz1
      &     ,tausumw,tausumi
-     !osipov add the aerosol optical depth by modes
+!osipov add the aerosol optical depth by modes
      &     ,tau_as
 #ifdef mjo_subdd
       use rad_com, only: OLR_acc,OLR_cnt,SWHR,LWHR,SWHR_cnt,LWHR_cnt
@@ -3411,10 +3411,10 @@ C**** cases using all levels up to LmaxSUBDD
 #endif
 !osipov add the overall sulfate mass and AOD
 #ifdef TRACERS_AMP
-     *         "sulfate", 'sulfate_aod'
+     *         "sulfate", "sulf_aod",
 #endif
 !osipov so2 diags
-     *         "lwhr_so2","lwhr","so2_ppmv"
+     *         "lwhr_so2","lwhr",
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
           kunit=kunit+1
 #ifdef mjo_subdd
@@ -3455,7 +3455,7 @@ C**** cases using all levels up to LmaxSUBDD
               long_name = 'Sulfate Mass overall'
               qinstant = .true.    
 !osipov, add instanteneous SO4 optical depth
-            case ("sulfate")
+            case ("sulf_aod")
               datar8(:,:) = tau_as(:,:,l,1)+tau_as(:,:,l,2)
               units_of_data = ''
               long_name = 'sulfate (modes 1 and 2) optical depth'
