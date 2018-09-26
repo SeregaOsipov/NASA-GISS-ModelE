@@ -45,8 +45,7 @@
      &                     ,nfastj=4
      &                     ,mfastj=1
      &                     ,mfit=2*M__
-!osipov, increase nlfastj 10 times due to extreme sulfate OD
-     &                     ,nlfastj=42000
+     &                     ,nlfastj=4200
      &                     ,njval=27 !formerly read in from jv_spec00_15.dat
      &                     ,nwfastj=18
      &                     ,np=60
@@ -583,6 +582,7 @@ C**** Local parameters and variables and arguments:
 #ifdef TRACERS_ON
       logical             :: skip_tracer
 #endif
+      character(len=300)  :: out_line
 
 #ifdef TRACERS_ON
 c Zero aerosol and cloud column
@@ -683,6 +683,16 @@ c Now do the rest of the aerosols
         !osipov see the TRAMP_config for a list of aerosols, line 240
         AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
      &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
+        !osipov sometimes there is sponteneously high AOD values, limit them
+        !osipov //TODO: figure out why there are spontaneous spikes in AOD and remove this hack
+        do LL=1,NLGCM
+          if(AER2(LL,1) > 50.d0) then
+            AER2(LL,1) = 50.d0
+            write(out_line,*) 'osipov diags, fastj2 AOD exceeded 50 and 
+     &          was replaced at i, j, k', NSLON, NSLAT, LL
+            call write_parallel(trim(out_line),crit=.true.)
+          endif
+        enddo
       endif
 #endif
 
