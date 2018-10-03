@@ -3463,11 +3463,17 @@ C**** cases using all levels up to LmaxSUBDD
               qinstant = .true.    
 #endif
 !osipov, add instanteneous SO4 optical depth
-!osipov //TODO: this will not work right in OMA case
             case ("sulf_aod")
+#ifdef TRACERS_AMP            
+              !(modes 1 and 2)
+              !//TODO: replace them with ntrix_aod(n_N_AKK_1) and ntrix_aod(n_N_ACC_1)
               datar8(:,:) = tau_as(:,:,l,1)+tau_as(:,:,l,2)
+#else
+!OMA case
+	          datar8(:,:) = tau_as(ntrix_aod(n_SO4))
+#endif              
               units_of_data = ''
-              long_name = 'sulfate (modes 1 and 2) optical depth'
+              long_name = 'sulfate optical depth'
               qinstant = .true.    
 
 #ifdef mjo_subdd
