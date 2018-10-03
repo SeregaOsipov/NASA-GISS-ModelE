@@ -3409,10 +3409,12 @@ C**** cases using all levels up to LmaxSUBDD
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
      *         "swhr","TDRY","SDRY","DDRY","LDRY",
 #endif
-!osipov add the overall sulfate mass and AOD
+!osipov add the overall sulfate mass
 #ifdef TRACERS_AMP
-     *         "sulfate", "sulf_aod",
+     *         "sulfate",
 #endif
+!osipov add sulfate AOD
+     *         "sulf_aod",
 !osipov so2 diags
      *         "lwhr_so2","lwhr",
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
@@ -3440,6 +3442,7 @@ C**** cases using all levels up to LmaxSUBDD
               units_of_data = 'K/day'
               long_name = 'Longwave Radiative Heating Rate of SO2'
               qinstant = .true.
+#ifdef TRACERS_AMP
 !osipov, add instanteneous SO4 mass
             case ("sulfate")
               datar8(:,:) =
@@ -3454,7 +3457,9 @@ C**** cases using all levels up to LmaxSUBDD
               units_of_data = 'kg'
               long_name = 'Sulfate Mass overall'
               qinstant = .true.    
+#endif
 !osipov, add instanteneous SO4 optical depth
+!osipov //TODO: this will not work right in OMA case
             case ("sulf_aod")
               datar8(:,:) = tau_as(:,:,l,1)+tau_as(:,:,l,2)
               units_of_data = ''
