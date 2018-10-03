@@ -1858,6 +1858,10 @@ c get_subdd
      &                        n_M_BC2_SU,n_M_BC3_SU,n_M_DBC_SU,
      &                        n_M_BOC_SU,n_M_BCS_SU,n_M_MXX_SU
 #endif
+#ifdef TRACERS_ON
+      use TRACER_COM, only: n_SO4
+#endif      
+
       USE GEOM, only : imaxj,axyp,byaxyp
 #ifdef ttc_subdd
      *                ,cosu,sinu,dxv,dyp,bydxyp
@@ -1903,7 +1907,7 @@ c get_subdd
       USE RAD_COM, only : trhr,srhr,srdn,salb,cfrac,cosz1
      &     ,tausumw,tausumi
 !osipov add the aerosol optical depth by modes
-     &     ,tau_as
+     &     ,tau_as, ntrix_aod
 #ifdef mjo_subdd
       use rad_com, only: OLR_acc,OLR_cnt,SWHR,LWHR,SWHR_cnt,LWHR_cnt
      &   ,swu_avg,swu_cnt
