@@ -3407,8 +3407,8 @@ C**** Additional diags - multiple records per file
         select case (trim(namedd(k)))
 C**** cases using all levels up to LmaxSUBDD
           case ("SO2", "SO4", "SO4_d1", "SO4_d2", "SO4_d3", "Clay",
-     *         "Silt1", "Silt2", "Silt3", "CTEM", "CL3D", "CI3D", "CD3D"
-     *         , "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
+     *         "Silt1", "Silt2", "Silt3", "CTEM", "CL3D", "CI3D", "CD3D",
+     *         "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
      *         "swhr","TDRY","SDRY","DDRY","LDRY",
@@ -3417,8 +3417,8 @@ C**** cases using all levels up to LmaxSUBDD
 #ifdef TRACERS_AMP
      *         "sulfate",
 #endif
-!osipov add sulfate AOD
-     *         "sulf_aod",
+!osipov add sulfate AOD, aerosol (all of them) AOD
+     *         "sulf_aod", "aer_aod",
 !osipov so2 diags
      *         "lwhr_so2","lwhr",
      *         "RADHEAT","CLWP","itAOD","ictAOD","itAAOD")
@@ -3427,7 +3427,7 @@ C**** cases using all levels up to LmaxSUBDD
           qinstant=.true.
 #endif
           do l=1,LmaxSUBDD
-            select case(namedd(k))
+            select case(trim(namedd(k)))
 !osipov, add instanteneous SW & LW heating rates            
 !            case ("swhr")
 !              datar8(:,:)=SRHR(L,:,:)*COSZ2(:,:)*bysha*byMA(L,:,:)
@@ -3469,12 +3469,19 @@ C**** cases using all levels up to LmaxSUBDD
               !//TODO: replace them with ntrix_aod(n_N_AKK_1) and ntrix_aod(n_N_ACC_1)
               datar8(:,:) = tau_as(:,:,l,1)+tau_as(:,:,l,2)
 #else
-!OMA case
-	          datar8(:,:) = tau_as(ntrix_aod(n_SO4))
+              !OMA case
+              !//TODO: use ntrix_aod to find where index is equal SO4
+              datar8(:,:) = tau_as(:,:,l,3)
 #endif              
               units_of_data = ''
-              long_name = 'sulfate optical depth'
+              long_name = 'sulfate aerosol optical depth'
               qinstant = .true.    
+!osipov, add instanteneous aerosol optical depth (all types)
+            case ("aer_aod")
+              datar8(:,:) = sum(tau_as(:,:,l,:), dim=3)
+              units_of_data = ''
+              long_name = 'aerosol (all types) optical depth'
+              qinstant = .true.
 
 #ifdef mjo_subdd
 C**** accumulating/averaging mode ***

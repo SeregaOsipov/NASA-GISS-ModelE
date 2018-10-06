@@ -683,18 +683,21 @@ c Now do the rest of the aerosols
         !osipov see the TRAMP_config for a list of aerosols, line 240
         AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
      &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
-        !osipov sometimes there is sponteneously high AOD values, limit them
-        !osipov //TODO: figure out why there are spontaneous spikes in AOD and remove this hack
-        do LL=1,NLGCM
-          if(AER2(LL,1) > 50.d0) then
-            AER2(LL,1) = 50.d0
-            write(out_line,*) 'osipov diags, fastj2 AOD exceeded 50 and 
-     &          was replaced at i, j, k', NSLON, NSLAT, LL
-            call write_parallel(trim(out_line),crit=.true.)
-          endif
-        enddo
       endif
 #endif
+
+!osipov limit the max aerosol OD for fastj calculation, because fastj can't handle them
+!osipov in case of MATRIX sometimes there is sponteneously high AOD values for the super eruption case
+!osipov in case of OMA AOD get too high in general and at the poles
+!osipov //TODO: fix the fasj2 and remove this for-loop
+      do LL=1,NLGCM
+        if(AER2(LL,1) > 50.d0) then
+          AER2(LL,1) = 50.d0
+          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 50 and 
+     &          was replaced at i, j, k', NSLON, NSLAT, LL
+          call write_parallel(trim(out_line),crit=.true.)
+        endif
+      enddo
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
