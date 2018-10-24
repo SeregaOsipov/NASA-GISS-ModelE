@@ -122,10 +122,6 @@ EOF
 
 cmpcmd="${fccmd} csregrid.f miscnc.f ${progname}.f driver.f -o ${progname} ${ncinc} ${nclib}"
 echo $cmpcmd
-!echo "osipov"
-!echo ${fccmd}
-!echo "osipov2"
-!echo ${progname}
 $cmpcmd  || exit  # terminate the script if any compilation fails
 rm -f driver.f
 

@@ -1622,7 +1622,7 @@ c add (calls to) the analogs of ijh_defs et al.
 
       k = k + 1
       catshapes(k) = 'aijph'; categories(k) = 'aijph'
-      input_sizes3(k) = subdd_npres !lm !osipov
+      input_sizes3(k) = lm !osipov shoud it be subdd_npres?
       call ijph_defs(diaglists(1,k),nmax_possible,diaglens(k))
 
       k = k + 1
@@ -1680,7 +1680,7 @@ c add (calls to) the analogs of ijh_defs et al.
 
       k = k + 1
       catshapes(k) = 'aijph'; categories(k) = 'taijph'
-      input_sizes3(k) = subdd_npres !lm !osipov
+      input_sizes3(k) = lm !osipov should it be subdd_npres?
       call tijph_defs(diaglists(1,k),nmax_possible,diaglens(k))
 #endif
 
