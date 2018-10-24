@@ -691,9 +691,9 @@ c Now do the rest of the aerosols
 !osipov in case of OMA AOD get too high in general and at the poles
 !osipov //TODO: fix the fasj2 and remove this for-loop
       do LL=1,NLGCM
-        if(AER2(LL,1) > 50.d0) then
-          AER2(LL,1) = 50.d0
-          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 50 and 
+        if(AER2(LL,1) > 30.d0) then
+          AER2(LL,1) = 30.d0
+          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 30 and 
      &          was replaced at i, j, k', NSLON, NSLAT, LL
           call write_parallel(trim(out_line),crit=.true.)
         endif

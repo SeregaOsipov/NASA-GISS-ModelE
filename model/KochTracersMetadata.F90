@@ -116,12 +116,16 @@ module KochTracersMetadata_mod
 
     subroutine SO4_setSpec(name)
       character(len=*), intent(in) :: name
+      !osipov add the so4 effective radius to the R rundeck params
+      real*8 :: tmp
       n = oldAddTracer(name)
       n_SO4 = n 
       call set_ntm_power(n, -11)
       call set_tr_mm(n, 96.d+0)
       call set_trpdens(n, 1.7d3) !kg/m3 this is sulfate value
-      call set_trradius(n, 3.d-7 ) !m
+      tmp = 3.d-7
+      call sync_param("so4_grav_effective_radius", tmp)
+      call set_trradius(n, tmp ) !m
       call set_fq_aer(n, 1.d0   ) !fraction of aerosol that dissolves
       call set_tr_wd_type(n, npart)
       call set_pm2p5fact(n, 1.d0) ! fraction that's PM2.5
