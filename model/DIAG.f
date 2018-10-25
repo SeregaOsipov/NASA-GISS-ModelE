@@ -761,7 +761,6 @@ c constant-pressure diagnostics
 c
       pecp(2:lm+1) = ple(1:lm)
       pecp(1) = 1d30 ! ensure that all column mass is included
-      qlh=lhe
       do j=j_0,j_1
       do i=i_0,imaxj(j)
         pedge(:) = pedn(:,i,j)
@@ -775,6 +774,8 @@ c
           wmdp(l) = 0d0
           wmliqdp(l) = 0d0
           wmfrzdp(l) = 0d0
+          If (TX(I,J,L) >= TF)  Then  ;  QLH = LHE
+                                Else  ;  QLH = LHS  ;  EndIf
           rh(l) = q(i,j,l)/min(1d0,QSAT(TX(I,J,L),QLH,pmid(l,i,j)))
         enddo
         do l=1,lmx
@@ -1997,10 +1998,8 @@ C**** depending on namedd string choose what variables to output
         long_name = 'not yet set in get_subdd'
 
 C**** simple diags (one record per file)
-!osipov bug fix
-!        select case (namedd(k))
-        select case (trim(namedd(k)))
-        case ("slp")            ! sea level pressure (mb)
+        select case (namedd(k))
+        case ("SLP")            ! sea level pressure (mb)
           units_of_data = '10^2 Pa'
           long_name = 'Sea Level Pressure'
           do j=J_0,J_1
@@ -3404,14 +3403,14 @@ C**** get model level
 !===========
 
 C**** Additional diags - multiple records per file
-        select case (trim(namedd(k)))
+        select case (namedd(k))
 C**** cases using all levels up to LmaxSUBDD
           case ("SO2", "SO4", "SO4_d1", "SO4_d2", "SO4_d3", "Clay",
-     *         "Silt1", "Silt2", "Silt3", "CTEM", "CL3D", "CI3D", "CD3D",
-     *         "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
+     *         "Silt1", "Silt2", "Silt3", "CTEM", "CL3D", "CI3D", "CD3D"
+     *         , "CLDSS", "CLDMC", "CDN3D", "CRE3D", "TAUSS", "TAUMC",
 #ifdef mjo_subdd
      *         "LWC","IWC","TLH","SLH","DLH","LLH",
-     *         "swhr","TDRY","SDRY","DDRY","LDRY",
+     *         "SWH","LWH","TDRY","SDRY","DDRY","LDRY",
 #endif
 !osipov add the overall sulfate mass
 #ifdef TRACERS_AMP
@@ -3545,14 +3544,14 @@ C**** accumulating/averaging mode ***
               units_of_data = 'kg/kg/day'
               long_name = 'Drying by large-scale conden.'
               qinstant = .false.
-            case ("swhr")
+            case ("SWH")
               datar8(:,:)=SECONDS_PER_DAY*SWHR(:,:,l)/SWHR_cnt
               SWHR(:,:,l)=0.
               IF (l.eq.LmaxSUBDD) SWHR_cnt=0.
               units_of_data = 'K/day'
               long_name = 'Shortwave Radiative Heating Rate'
               qinstant = .false.
-            case ("lwhr")
+            case ("LWH")
               datar8(:,:)=SECONDS_PER_DAY*LWHR(:,:,l)/LWHR_cnt
               LWHR(:,:,l)=0.
               IF (l.eq.LmaxSUBDD) LWHR_cnt=0.
@@ -3561,16 +3560,15 @@ C**** accumulating/averaging mode ***
               qinstant = .false.
 #endif
 
-            !osipov extract SO2 from the ifdef below
+#ifdef TRACERS_HETCHEM
             case ("SO2")
               datar8=trm(:,:,l,n_SO2)
               units_of_data = 'kg'
               long_name = 'Sulfur Dioxide Mass'
-#ifdef TRACERS_HETCHEM
             case ("SO4")
               datar8=trm(:,:,l,n_SO4)
               units_of_data = 'kg'
-              long_name = 'Sulfate Mass'            
+              long_name = 'Sulfate Mass'
             case ("SO4_d1")
               datar8=trm(:,:,l,n_SO4_d1)
               units_of_data = 'kg'
@@ -4384,38 +4382,25 @@ c time_subdd
 !@auth Jan Perlwitz
       use model_com, only: modelEclock
       use BaseTime_mod, only: BaseTime, newBaseTime
-      use TimeConstants_mod, only: INT_HOURS_PER_DAY
-      USE TimeInterval_mod
-      use Rational_mod
       implicit none
 
       integer,intent(in) :: rec
       logical,intent(in) :: q24
       integer :: year, month, date
       type (BaseTime) :: t
-      type (TimeInterval) :: sPerDay
-      
-      !osipov bug fix
-      integer :: year1,mon1,day1,jdate1,hour1
-      character(len=4) :: amon1
 
-      call modelEclock%get(year=year, month=month, date=date)
-      sPerDay = calendar%getSecondsPerDay()
-
+      call modelEclock%get(year=year, month=month,
+     &       date=date)
       if (q24) then ! coordinate is #days
-        !osipov bug fix
-        t = modelEclock%getTimeInSecondsFromDate(iyear1,month,date,0)
-        time_subdd = nint(real(t%Rational/sPerDay))
+        t = newBaseTime(
+     &       modelEclock%getTimeInSecondsFromDate(iyear1,month,date,0))
+        time_subdd = nint(t / calendar%getSecondsPerDay())
       else ! coordinate is #hours
-        !osipov bug fix
-        !osipov //TODO: there is still bug with the time
-        call getdte(nsubdd-1,nday,iyear1,year1,mon1,day1,
-     &              jdate1,hour1,amon1)
-        t = modelEclock%getTimeInSecondsFromDate(iyear1,mon1,day1,hour1)
-        
-        !t = modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
-        time_subdd = nint((real(t%Rational)+(rec-1)*nsubdd*dtsrc)
-     &               / (real(sPerDay)/INT_HOURS_PER_DAY))
+        t = newBaseTime(
+     &       modelEclock%getTimeInSecondsFromDate(iyear1,month,0,0)
+     &        + (rec-1)*nsubdd*dtsrc)
+        time_subdd =
+     &       nint(t / (calendar%getSecondsPerDay()/INT_HOURS_PER_DAY))
       end if
 
       return
