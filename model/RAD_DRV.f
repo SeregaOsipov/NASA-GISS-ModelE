@@ -712,7 +712,7 @@ caer   KRHTRA=(/1,1,1,1,1,1,1,1/)
 #endif
         end if
         ntrix_aod(n+1)=n_SO4
-        trrdry(n+1)=0.15d0
+        trrdry(n+1)=0.15d0 !osipov update the effective radius, 0.5d0
         itr(n+1)=1
 #ifndef SULF_ONLY_AEROSOLS
         ntrix_aod(n+2:n+nraero_koch)=(/

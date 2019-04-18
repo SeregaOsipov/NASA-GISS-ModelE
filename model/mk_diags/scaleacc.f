@@ -278,6 +278,7 @@ c
           status = nf_inq_varid(ofid,trim(sname_acc(k)),varid)
           if(status.ne.nf_noerr) cycle ! this output was not requested
           call get_varsize(ofid,trim(sname_acc(k)),arrsize_out_all)
+          arrsize_out_all = max(arrsize_out_all,arrsize_out)
           slices_total = arrsize_out_all/arrsize_out
           if(arrsize_out_all.ne.arrsize_out*slices_total) then
             write(6,*) 'scaleacc: size mismatch'
