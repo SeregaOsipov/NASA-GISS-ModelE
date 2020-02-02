@@ -4442,6 +4442,18 @@ c- 3D diagnostic per mode
       end select
       end do
 
+! osipov, add photlysis diagnostics
+! TODO: check power and units
+	do n=1,NWW
+      k = k + 1
+         ijlt_af(n)=k
+         lname_ijlt(k) = 'actinic flux in band '//TRIM(str(n))
+         sname_ijlt(k) = 'act_flux_b'//TRIM(trname(n))
+         ijlt_power(k) = -2.
+         units_ijlt(k) = unit_string(ijlt_power(k),' NaN')
+         scale_ijlt(k) = 10.**(-ijlt_power(k))
+	end do
+
 C**** 3D tracer-related arrays but not attached to any one tracer
 
 #ifdef TRACERS_SPECIAL_Shindell

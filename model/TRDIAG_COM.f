@@ -252,6 +252,9 @@ C**** TAIJLS 3D special tracer diagnostics
      & ,ijlt_JH2O2,ijlt_prodSO4aq,ijlt_prodSO4gs,ijlt_O3ppbv
      & ,ijlt_O3cmatm
      & ,ijlt_clrsky2d=0
+! osipov, add fast j diagnostics to the output
+!@var ijlt_af actinic flux for N spectral band
+	  integer, allocatable :: ijlt_af(:)
 !@var ijlt_aH2O aerosol H2O from thermodynamics (ug/m3)
 !@var ijlt_apH aerosol pH from thermodynamics (dimensionless)
       integer :: ijlt_aH2O,ijlt_apH
@@ -1382,6 +1385,8 @@ C*** Unpack read global data into local distributed arrays
       USE DOMAIN_DECOMP_ATM, only : getDomainBounds, AM_I_ROOT, GRID
       use diag_zonal, only : get_alloc_bounds
       use fluxes, only : atmocn
+      !osipov, TODO: check that var is initialized
+      use photolysis, only: NWWW
       implicit none
       INTEGER :: J_0H,J_1H, I_0H,I_1H
       INTEGER :: status
@@ -1527,6 +1532,11 @@ C*** Unpack read global data into local distributed arrays
       allocate(ijlt_AMPm(3,ntm))
       ijlt_AMPm = 0
 #endif 
+
+!osipov, photolysis diags
+	  allocate(ijlt_af(NWWW)
+	  ijlt_af = 0
+	  
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT
       allocate(ijlt_3Dmass(ntm))
       ijlt_3Dmass = 0

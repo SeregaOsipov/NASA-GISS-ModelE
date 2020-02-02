@@ -104,9 +104,11 @@ c
       use subdd_mod, only : subdd_groups,subdd_type,subdd_ngroups
      &     ,inc_subdd,find_groups, LmaxSUBDD
 #endif
-!osipov add so2
+! osipov add so2 and actinic flux fff
       use photolysis, only: fastj2_drv,o3_fastj,so2_fastj,rj
-     &                     ,sza,szamax,zj,jpnl,sf3_fact,sf2_fact
+     &                     ,sza,szamax,zj,jpnl,sf3_fact,sf2_fact,fff
+! osipov fast-j2 diags
+use photolysis, only: NWWW
 
       IMPLICIT NONE
 
@@ -728,6 +730,12 @@ C Define and alter resulting photolysis coefficients (zj --> ss):
      &    1.d-3*rgas*bygrav*TX(I,J,L)*LOG(PEDN(L,i,j)/PEDN(L+1,i,j))
           colmO2=colmO2+y(nO2,L)*thick*1.d5
           colmO3=colmO3+y(nO3,L)*thick*1.d5
+          
+          !osipov add the fastj diags to the output
+          do n=1,NWWW
+          	taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
+          end do
+          
 ! SF3 is photolysis of water in Schumann-Runge bands based on:
 ! Nicolet, Pl. Space Sci., p 871, 1984.
 ! SF3_fact is, if x[ ] = bin4_flux[ ]:
