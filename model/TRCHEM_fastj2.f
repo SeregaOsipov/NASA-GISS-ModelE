@@ -1455,7 +1455,8 @@ c Total optical depth from all elements:
 ! for strat volcano ONLY! test the sulf aerosol as rayleigh scattering
 ! I've hardcoded this for the MATRIX case
 		if(WAVEL <= 291.d0) then
-			XLRAY=XLRAY + XLAER(1) * 0.57d0
+			XLRAY=XLRAY+XLAER(1)*0.57d0
+			DTAUX(J)=DTAUX(J)+XLAER(1)*0.57d0
 		endif
 !        do I=1,njaero
 !          DTAUX(J)=DTAUX(J)+XLAER(I)
