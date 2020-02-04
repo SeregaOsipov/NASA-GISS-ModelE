@@ -1451,9 +1451,15 @@ C---Set up total optical depth over each CTM level, DTAUX:
 #ifdef TRACERS_ON
         XLAER(:)=AER2(J,:)*QXMIE(:,J) ! njaero
 c Total optical depth from all elements:
-        do I=1,njaero
-          DTAUX(J)=DTAUX(J)+XLAER(I)
-        enddo
+! osipov TODO: REMOVE ME, only a test!
+! for strat volcano ONLY! test the sulf aerosol as rayleigh scattering
+! I've hardcoded this for the MATRIX case
+		if(WAVEL <= 291.d0) then
+			XLRAY=XLRAY + XLAER(1) * 0.57d0
+		endif
+!        do I=1,njaero
+!          DTAUX(J)=DTAUX(J)+XLAER(I)
+!        enddo
 #endif
 c Fractional extinction for Rayleigh scattering and each aerosol type:
         PIRAY2(J)=XLRAY/DTAUX(J)
