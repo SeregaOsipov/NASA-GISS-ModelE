@@ -20,6 +20,10 @@ EXTENDED_SOURCE = -extend_source
 SUPPORTED_RELEASES = 14.0 15.0 16.0
 OVERWRITE=YES
 
+
+COMPILE_WITH_TRAPS=YES
+
+
 ifneq ($(OVERWRITE),YES)
 ifeq ($(findstring $(IFORT_RELEASE),$(SUPPORTED_RELEASES)),)
   $(error ifort version $(IFORT_RELEASE) is not supported by this code. \
@@ -56,8 +60,10 @@ FFLAGS += $(FFLAGS_RELEASE)
 F90FLAGS += $(FFLAGS_RELEASE)
 
 ifeq ($(COMPILE_WITH_TRAPS),YES)
-FFLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
-LFLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
-F90FLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
-LFLAGSF += -CB -fpe0 -check uninit -ftrapuv -traceback
+#fpe0 is the key!
+#-CB -check uninit -ftrapuv 
+FFLAGS += -traceback
+LFLAGS += -traceback
+F90FLAGS += -traceback
+LFLAGSF += -traceback
 endif

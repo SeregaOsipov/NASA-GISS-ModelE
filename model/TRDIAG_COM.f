@@ -1385,8 +1385,9 @@ C*** Unpack read global data into local distributed arrays
       USE DOMAIN_DECOMP_ATM, only : getDomainBounds, AM_I_ROOT, GRID
       use diag_zonal, only : get_alloc_bounds
       use fluxes, only : atmocn
-      !osipov, TODO: check that var is initialized
-      use photolysis, only: NWWW
+      !osipov, TODO: this use causes the circular dependence
+      !TODO: think how to replace 18 with NWWW 
+!      use photolysis, only: NWWW
       implicit none
       INTEGER :: J_0H,J_1H, I_0H,I_1H
       INTEGER :: status
@@ -1534,7 +1535,9 @@ C*** Unpack read global data into local distributed arrays
 #endif 
 
 !osipov, photolysis diags
-	  allocate(ijlt_af(NWWW)
+!	  allocate(ijlt_af(NWWW)
+! osipov TODO replace 18 with var
+          allocate(ijlt_af(18))
 	  ijlt_af = 0
 	  
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT

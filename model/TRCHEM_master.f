@@ -72,6 +72,7 @@ c
 #ifdef INTERACTIVE_WETLANDS_CH4
       USE TRACER_SOURCES, only: avg_model,n__sw
 #endif
+! osipov, add fast-j2 diags, ijlt_af
       USE TRDIAG_COM, only    : taijs=>taijs_loc,taijls=>taijls_loc
      &     ,ijlt_NO3,jls_COp,jls_COd,jls_Oxp,jls_N2O5sulf,jls_O3vmr
      &     ,jls_Oxd,jls_OxpT,jls_OxdT,ijs_NO2_1030,ijs_NO2_1030c
@@ -79,7 +80,7 @@ c
      &     ,ijlt_pOH,ijlt_OxpHO2,ijlt_OxpCH3O2,ijlt_OxlHO2,ijlt_OxlALK
      &     ,ijlt_OxlOH,ijs_NO2_1330,ijs_NO2_1330c,ijlt_NO2vmr,ijlt_NOvmr
      &     ,ijlt_JO1D,ijlt_JNO2,ijlt_JH2O2,ijlt_O3ppbv,ijlt_O3cmatm
-     &     ,jls_ClOcon,jls_H2Ocon
+     &     ,jls_ClOcon,jls_H2Ocon,ijlt_af
       USE TRCHEM_Shindell_COM
 #ifdef TRACERS_AEROSOLS_SOA
       USE TRACERS_SOA, only: soa_aerosolphase,voc2nox,soa_apart,
@@ -104,11 +105,10 @@ c
       use subdd_mod, only : subdd_groups,subdd_type,subdd_ngroups
      &     ,inc_subdd,find_groups, LmaxSUBDD
 #endif
-! osipov add so2 and actinic flux fff
+! osipov add so2 and fast-j2 diags (actinic flux fff)
       use photolysis, only: fastj2_drv,o3_fastj,so2_fastj,rj
      &                     ,sza,szamax,zj,jpnl,sf3_fact,sf2_fact,fff
-! osipov fast-j2 diags
-use photolysis, only: NWWW
+     &                     ,NWWW
 
       IMPLICIT NONE
 

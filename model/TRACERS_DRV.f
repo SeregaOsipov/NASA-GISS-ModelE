@@ -4218,6 +4218,8 @@ c      enddo
 #ifdef SOA_DIAGS
       use tracers_soa, only: issoa
 #endif  /* SOA_DIAGS */
+! osipov, add fast-j2 diags
+      use photolysis, only: NWWW
       implicit none
       integer k,n,i
       character*50 :: unit_string
@@ -4225,6 +4227,8 @@ c      enddo
       character*1 :: clay_num
       integer :: iclay
       integer :: ktaijlt_out
+! osipov, temp var
+      CHARACTER(LEN=15) :: temp_str
 
 #ifdef TRACERS_ON
       ir_ijlt = ir_log2  ! default
@@ -4444,15 +4448,17 @@ c- 3D diagnostic per mode
 
 ! osipov, add photlysis diagnostics
 ! TODO: check power and units
-	do n=1,NWW
-      k = k + 1
+      do n=1,NWWW
+        k = k + 1
          ijlt_af(n)=k
-         lname_ijlt(k) = 'actinic flux in band '//TRIM(str(n))
-         sname_ijlt(k) = 'act_flux_b'//TRIM(trname(n))
-         ijlt_power(k) = -2.
+         write(temp_str , '(I2)') n
+         !print *,'osipov acf_flux_b'//temp_str
+         lname_ijlt(k) = 'actinic flux in band '//trim(temp_str)
+         sname_ijlt(k) = 'act_flux_b'//trim(adjustl(temp_str))
+         ijlt_power(k) = 0
          units_ijlt(k) = unit_string(ijlt_power(k),' NaN')
          scale_ijlt(k) = 10.**(-ijlt_power(k))
-	end do
+      end do
 
 C**** 3D tracer-related arrays but not attached to any one tracer
 

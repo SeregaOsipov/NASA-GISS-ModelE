@@ -1,1 +1,1 @@
-compiler.ftn.mk_production
+compiler.ftn.mk_debug
