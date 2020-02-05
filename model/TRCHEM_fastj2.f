@@ -40,12 +40,12 @@
 !@param nlevref number of reference levels for T/O3 profiles
       integer, parameter :: 
      &                      szamax=98.d0
-     &                     ,N__=5400
+     &                     ,N__=54000 ! osipov increase 10 times
      &                     ,M__=4
      &                     ,nfastj=4
      &                     ,mfastj=1
      &                     ,mfit=2*M__
-     &                     ,nlfastj=4200
+     &                     ,nlfastj=42000 ! osipov, increase 10 times to allow UV scattering calculations
      &                     ,njval=27 !formerly read in from jv_spec00_15.dat
      &                     ,nwfastj=18
      &                     ,np=60
@@ -1442,9 +1442,10 @@ C---Set up total optical depth over each CTM level, DTAUX:
         XLO2=DMFASTJ2(J)*XQO2_2(J)*pO2*o2x
         XLSO2=dso22(J)*XQSO2_2(J)
         XLRAY=DMFASTJ2(J)*QRAYL(KW)
-        if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
+        ! osipov, turn on scattering calculations in UV
+        !if(WAVEL <= 291.d0) XLRAY=XLRAY * 0.57d0
         DTAUX(J)=XLO3+XLO2+XLRAY
-        !osipov add SO2 effect on actinic flux
+        ! osipov add SO2 effect on actinic flux
         if ( so2_j_feedback == 1) then
           DTAUX(J)=DTAUX(J)+XLSO2
         endif
@@ -1454,13 +1455,13 @@ c Total optical depth from all elements:
 ! osipov TODO: REMOVE ME, only a test!
 ! for strat volcano ONLY! test the sulf aerosol as rayleigh scattering
 ! I've hardcoded this for the MATRIX case
-		if(WAVEL <= 291.d0) then
-			XLRAY=XLRAY+XLAER(1)*0.57d0
-			DTAUX(J)=DTAUX(J)+XLAER(1)*0.57d0
-		endif
-!        do I=1,njaero
-!          DTAUX(J)=DTAUX(J)+XLAER(I)
-!        enddo
+!        if(WAVEL <= 291.d0) then
+!          XLRAY=XLRAY+XLAER(1)*0.57d0
+!          DTAUX(J)=DTAUX(J)+XLAER(1)*0.57d0
+!        endif
+        do I=1,njaero
+          DTAUX(J)=DTAUX(J)+XLAER(I)
+        enddo
 #endif
 c Fractional extinction for Rayleigh scattering and each aerosol type:
         PIRAY2(J)=XLRAY/DTAUX(J)
@@ -1487,20 +1488,21 @@ C---Calculate attenuated incident beam EXP(-TTAU/U0) & flux on surface:
       enddo
 
 C---in UV region, use pseudo-Rayleigh absorption instead of scattering:
-      if (WAVEL <= 291.d0) then
+      ! osipov, force scattering effects in the entire UV
+      !if (WAVEL <= 291.d0) then
 C---Accumulate attenuation for level centers:
-        do j=1,NLGCM
-          if (j < J1) then
-            FMEAN(J) = 0.d0
-          else
-            FMEAN(J) = sqrt(FTAU(J)*FTAU(J+1))
-          endif
-        enddo
-        GOTO 999 ! was return which prevented deallocation
+      !  do j=1,NLGCM
+      !    if (j < J1) then
+      !      FMEAN(J) = 0.d0
+      !    else
+      !      FMEAN(J) = sqrt(FTAU(J)*FTAU(J+1))
+      !    endif
+      !  enddo
+      !  GOTO 999 ! was return which prevented deallocation
 C---In visible region, consider scattering. Define the scattering
 C---phase function with mix of Rayleigh(1) & Mie(MIEDX2).
 C No. of quadrature pts fixed at 4 (M__), expansion of phase fn @ 8
-      else 
+      !else 
        do j=j1,NBFASTJ
         do i=1,MFIT
          pomegaj(i,j) = PIRAY2(J)*PAA(i,KM,1)
@@ -1724,7 +1726,8 @@ c Accumulate attenuation for selected levels:
           endif
         enddo
 
-      endif ! WAVEL
+      ! osipov, scattering effects in UV
+      !endif ! WAVEL
 
   999 continue
       deallocate( DTAUX )
