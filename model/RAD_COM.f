@@ -966,8 +966,10 @@ C**** Local variables initialised in init_RAD
               allocate(tau_dry(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             endif
             ! osipov TODO: check it restart logic is really necessary
-            allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bands,nraero_aod_rsf))
-            allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bands,nraero_aod_rsf))
+            allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,
+     &               n_spectral_bands,nraero_aod_rsf))
+            allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,
+     &               n_spectral_bands,nraero_aod_rsf))
 #ifdef CACHED_SUBDD
             allocate(abstau_as(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             allocate(abstau_cs(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))

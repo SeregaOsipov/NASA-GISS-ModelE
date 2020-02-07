@@ -564,7 +564,8 @@ C**** GLOBAL parameters and variables:
       use model_com, only: modelEclock
       USE RAD_COM,only: tau_as
       ! osipov
-      use rad_com, only: spectral_tau_ext, spectral_tau_sca,n_spectral_bands
+      use rad_com, only: spectral_tau_ext, spectral_tau_sca,
+     &                   n_spectral_bands
       USE RADPAR, only : nraero_aod=>ntrace
 #ifdef TRACERS_ON
       use OldTracer_mod, only: trname
@@ -580,7 +581,7 @@ C**** Local parameters and variables and arguments:
 !@var skip_tracer logical to not define aer2 for a rad code tracer
       INTEGER, INTENT(IN) :: nslon, nslat
       real*8, intent(IN) :: surfaceAlbedo
-      integer             :: l, k, i, ii, m, j, iclay, n, LL
+      integer             :: l, k, i, ii, m, j, iclay, n, LL, wli
       real*8, dimension(nlevref+1) :: pstd
       real*8, dimension(nlevref) :: oref3, tref3
       real*8              :: ydgrd,f0,t0,pb,pc,xc,scaleh
@@ -693,8 +694,10 @@ c Now do the rest of the aerosols
 !        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
 !     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
         ! osipov this is only the aerosols, have to add clouds later
-        fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) = spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
-        fastj_spectral_tau_sca(1:NLGCM,:,1:nraero_aod) = spectral_tau_sca(NSLON,NSLAT,1:NLGCM,:,:)
+        fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) =
+     &    spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
+        fastj_spectral_tau_sca(1:NLGCM,:,1:nraero_aod) =
+     &    spectral_tau_sca(NSLON,NSLAT,1:NLGCM,:,:)
       endif
 #endif
 
@@ -724,7 +727,7 @@ c  Assume limiting temperature for ice of -40 deg C :
       enddo
 
       ! osipov, add spectrally gray clouds (seems like a good assumption accordnig to fastj table species 7 and 11)
-      do wli=1:n_spectral_bands
+      do wli=1,n_spectral_bands
         fastj_spectral_tau_ext(:,wli,njaero) = odcol(:)
       enddo
 
@@ -1049,14 +1052,15 @@ C**** Local parameters and variables and arguments:
 C                     L=    1     2     3     4     5        6
 C             WavA (nm)=  2200  1500  1250   860   770      300
 C             WavB (nm)=  4000  2200  1500  1250   860      770
-      real*8 OPwavelengths(6) = (/3100., 1850., 1375., 1055., 815., 535./)
+      real*8, parameter :: OPwavelengths(6) = (/3100., 1850., 1375.,
+     &                                        1055., 815., 535./)
 
       allocate( XQO3_2(NBFASTJ) )
       allocate( XQO2_2(NBFASTJ) )
       ! osipov
       allocate( XQSO2_2(NBFASTJ) )
-      allocate( aerTauExt(NBFASTJ, nraero_aod) )
-      allocate( aerTauSca(NBFASTJ, nraero_aod) )
+      allocate( aerTauExt(NBFASTJ, njaero) )
+      allocate( aerTauSca(NBFASTJ, njaero) )
       
       allocate( AVGF(JPNL) )
 
@@ -1077,11 +1081,14 @@ C---Loop over all wavelength bins:
         END DO
 
         ! osipov extrapolate opt props to a given wavelength
-        call extrapolateOpticalProperty(fastj_spectral_tau_ext, OPwavelengths, aerTauExt, WAVE)
-        call extrapolateOpticalProperty(fastj_spectral_tau_sca, OPwavelengths, aerTauSca, WAVE)
+        call extrapolateOpticalProperty(fastj_spectral_tau_ext,
+     &                                  OPwavelengths, aerTauExt, WAVE)
+        call extrapolateOpticalProperty(fastj_spectral_tau_sca,
+     &                                  OPwavelengths, aerTauSca, WAVE)
         
         ! osipov, pass additionally SO2
-        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,AVGF)
+        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,
+     &             AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
       END DO
 
@@ -1098,22 +1105,27 @@ C---Loop over all wavelength bins:
       END SUBROUTINE JVALUE
 
 
-      subroutine extrapolateOpticalProperty(spectralOPin, wavelengthIn, OPOut, wavelengthOut)
+      subroutine extrapolateOpticalProperty(spectralOPin, wavelengthIn,
+     &                                      OPOut, wavelengthOut)
       ! osipov
       ! This subroutine uses Ansgtrom exponent to extrapolate to target wavelength
+      use rad_com, only : njaero
       implicit none
       
       ! dimensions are (vertical profile, wavelength, aerosol type)
       REAL*8, INTENT(IN) :: spectralOPin(:,:,:), wavelengthIn(:)
-      REAL*8, INTENT(IN) :: OPOut(:,:), wavelengthOut
+      REAL*8, INTENT(IN) :: wavelengthOut
+      REAL*8, INTENT(INOUT) :: OPOut(:,:)
       
-      REAL*8 :: angstromExponent
-      
+      REAL*8, dimension(nbfastj,njaero) :: angstromExponent
+
       !the wavelengths will be decreasing due to RADIATION.f
       !get angstrom exponent, alpha=-1 * log(tau_lambda/tau_lambdaRef)/log(lambda/lamdaRef)
-      angstromExponent = -1 * log(spectralOPin(:,5,:)/spectralOPin(:,6,:)) / log(wavelengthIn(5)/wavelengthIn(6))
+      angstromExponent =-1*log(spectralOPin(:,5,:)/spectralOPin(:,6,:))
+     &                   / log(wavelengthIn(5)/wavelengthIn(6))
       !use it to extrapolate
-      OPOut(:,:) = spectralOPin(:,6,:)*(wavelengthOut/wavelengthIn(6))**(-1*angstromExponent)
+      OPOut(:,:) = spectralOPin(:,6,:)*
+     &            (wavelengthOut/wavelengthIn(6))**(-1*angstromExponent)
       return
       end subroutine extrapolateOpticalProperty
       
@@ -1337,7 +1349,8 @@ c Lowest level intersected by emergent beam;
 
 
       
-      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,FMEAN)
+      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2,XQSO2_2,
+     &                 aerTauExt,aerTauSca,FMEAN)
 !@sum OPMIE NEW Mie code for Js, only uses 8-term expansion, 
 !@+   4-Gauss pts.
 !@auth UCI (see note above), GCM incorporation: Drew Shindell,

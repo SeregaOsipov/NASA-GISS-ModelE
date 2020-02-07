@@ -94,7 +94,7 @@ C****
      *     ,chl_from_obio,chl_from_seawifs
 #ifdef TRACERS_ON
      *     ,njaero,nraero_aod_rsf,nraero_rf_rsf,tau_as,tau_cs,tau_dry
-     *     ,spectral_tau_ext, spectral_tau_sca, n_spectral_bins ! osipov couple aerosols to photochemistry
+     *     ,spectral_tau_ext, spectral_tau_sca, n_spectral_bands ! osipov couple aerosols to photochemistry
 #ifdef CACHED_SUBDD
      *     ,abstau_as,abstau_cs,abstau_dry,swfrc,lwfrc
 #endif  /* CACHED_SUBDD */
@@ -654,8 +654,10 @@ caer   KRHTRA=(/1,1,1,1,1,1,1,1/)
             tau_dry = 0.d0
           endif
           ! osipov
-          allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bins,nraero_aod))
-          allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bins,nraero_aod))
+          allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,
+     &             n_spectral_bands,nraero_aod))
+          allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,
+     &             n_spectral_bands,nraero_aod))
           spectral_tau_ext = 0.d0
           spectral_tau_sca = 0.d0
 #ifdef CACHED_SUBDD
@@ -688,8 +690,8 @@ caer   KRHTRA=(/1,1,1,1,1,1,1,1/)
 #endif
       allocate(miedx2(nbfastj,njaero))
       allocate(aer2(nbfastj,njaero))
-      allocate(fastj_spectral_tau_ext(n_spectral_bins,nbfastj,njaero))
-      allocate(fastj_spectral_tau_sca(n_spectral_bins,nbfastj,njaero))
+      allocate(fastj_spectral_tau_ext(n_spectral_bands,nbfastj,njaero))
+      allocate(fastj_spectral_tau_sca(n_spectral_bands,nbfastj,njaero))
 #endif  /* TRACERS_SPECIAL_Shindell */
 
 !=======================================================================
