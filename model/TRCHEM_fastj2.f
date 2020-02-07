@@ -83,8 +83,9 @@
 !@+   defined at 233K.
       real*8, allocatable, dimension(:,:):: aer2
 ! osipov, couple aerosols to photochemistry
-      real*8, allocatable, dimension(:,:,:):: fastj_spectral_tau_ext
-      real*8, allocatable, dimension(:,:,:):: fastj_spectral_tau_sca
+      real*8, allocatable, dimension(:,:,:) :: fastj_spectral_tau_ext
+      real*8, allocatable, dimension(:,:,:) :: fastj_spectral_tau_sca
+      real*8, allocatable, dimension(:,:,:) :: fastj_spectral_g
 #endif
 !@var jaddlv Additional levels associated with each level
 !@var jadsub ?
@@ -565,7 +566,7 @@ C**** GLOBAL parameters and variables:
       USE RAD_COM,only: tau_as
       ! osipov
       use rad_com, only: spectral_tau_ext, spectral_tau_sca,
-     &                   n_spectral_bands
+     &                   spectral_g, n_spectral_bands
       USE RADPAR, only : nraero_aod=>ntrace
 #ifdef TRACERS_ON
       use OldTracer_mod, only: trname
@@ -596,6 +597,7 @@ c Zero aerosol and cloud column
       ! osipov
       fastj_spectral_tau_ext(:,:,:) = 0.d0
       fastj_spectral_tau_sca(:,:,:) = 0.d0
+      fastj_spectral_g(:,:,:) = 0.d0
 #endif
 
 c  Set up cloud and surface properties
@@ -686,18 +688,17 @@ c Now do the rest of the aerosols
 !osipov aerosolf feedback on photolysis
 #ifdef TRACERS_AMP
       if (aerosols_affect_photolysis == 1) then
-        !osipov there is only one aerosol mixture and 2 clouds
-        !osipov TODO: currently it is sulfate optical depth, replace it with the mixture AOD
-        !osipov TODO: check that it is actually the sulfate OD
-        !osipov see the TRAMP_config for a list of aerosols, line 240
         ! osipov TODO: this has to be ACC (index 2) and OCC (index 9)
 !        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
 !     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
+
         ! osipov this is only the aerosols, have to add clouds later
         fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) =
      &    spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
         fastj_spectral_tau_sca(1:NLGCM,:,1:nraero_aod) =
      &    spectral_tau_sca(NSLON,NSLAT,1:NLGCM,:,:)
+        fastj_spectral_g(1:NLGCM,:,1:nraero_aod) =
+     &    spectral_g(NSLON,NSLAT,1:NLGCM,:,:)
       endif
 #endif
 
@@ -726,9 +727,27 @@ c  Assume limiting temperature for ice of -40 deg C :
         endif
       enddo
 
-      ! osipov, add spectrally gray clouds (seems like a good assumption accordnig to fastj table species 7 and 11)
+      ! osipov, TODO: get proper spectral dependence for clouds      
       do wli=1,n_spectral_bands
-        fastj_spectral_tau_ext(:,wli,njaero) = odcol(:)
+	    do LL=1,NLGCM
+	      if(TFASTJ(LL) > 233.d0) then
+	        ! osipov, OD is currently spectrally gray (seems like a good assumption according to fastj table species 7 and 11)
+            ! osipov, asssume SSA=1 for clouds
+            fastj_spectral_tau_ext(LL,wli,njaero-1) = odcol(LL)
+            fastj_spectral_tau_ext(LL,wli,njaero) = 0
+            fastj_spectral_tau_sca(LL,wli,njaero-1) = odcol(LL)
+            fastj_spectral_tau_sca(LL,wli,njaero) = 0
+	      else
+            fastj_spectral_tau_ext(LL,wli,njaero-1) = 0
+            fastj_spectral_tau_ext(LL,wli,njaero) = odcol(LL)
+            fastj_spectral_tau_sca(LL,wli,njaero-1) = 0
+            fastj_spectral_tau_sca(LL,wli,njaero) = odcol(LL)
+	      endif
+	    enddo
+	    
+        ! osipov, TODO: get proper phase function calculations, for now it is spectrally gray
+        fastj_spectral_tau_sca(:,wli,njaero-1) = 4.002 ! data copied from jv_spec
+        fastj_spectral_tau_sca(:,wli,njaero) = 3.164
       enddo
 
 c Top of the part of atmosphere passed to Fast-J2:

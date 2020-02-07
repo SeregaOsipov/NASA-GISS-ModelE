@@ -193,9 +193,10 @@ C**** does not produce exactly the same as the default values.
 ! osipov, to couple aerosols to photochemistry, store spectral optical properties
       ! TODO: this should come from RADIATION.f, number of wavelength bands
       integer :: n_spectral_bands = 6
-! osipov, store extinction and scattering optical depths, to get tau and ssa later
+! osipov, store extinction and scattering optical depths and asymmetry parameter
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:,:) :: spectral_tau_ext
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:,:) :: spectral_tau_sca
+      REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:,:) :: spectral_g
 #ifdef CACHED_SUBDD
 !@var abstau_as Same as tau_as for absorption
 !@var abstau_cs Same as tau_cs for absorption
@@ -970,6 +971,8 @@ C**** Local variables initialised in init_RAD
      &               n_spectral_bands,nraero_aod_rsf))
             allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,
      &               n_spectral_bands,nraero_aod_rsf))
+            allocate(spectral_g(I_0H:I_1H,J_0H:J_1H,lm,
+     &               n_spectral_bands,nraero_aod_rsf))     
 #ifdef CACHED_SUBDD
             allocate(abstau_as(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             allocate(abstau_cs(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
