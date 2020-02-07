@@ -82,6 +82,9 @@
 !@+   and ice clouds element njaero. The water/ice threshold is
 !@+   defined at 233K.
       real*8, allocatable, dimension(:,:):: aer2
+! osipov, couple aerosols to photochemistry
+      real*8, allocatable, dimension(:,:,:):: fastj_spectral_tau_ext
+      real*8, allocatable, dimension(:,:,:):: fastj_spectral_tau_sca
 #endif
 !@var jaddlv Additional levels associated with each level
 !@var jadsub ?
@@ -400,8 +403,8 @@ c       19 = Ice Clouds
 
 !osipov matrix aerosols
 #ifdef TRACERS_AMP
-          !osipov //TODO: implement the mixture, for now it is only sulfate aerosol
-          !osipov, I've assigned now the sulfate aerosol, instead pass aod, ssa and g directly in fastj
+          ! osipov, The Miedx2 logic now is redundant. I am passing the spectral OP from outside into photochemistry
+          ! osipov, these spectral OP already has all the information incorporated: RI, size distribution, mixing and so on
           MIEDX2(LL,n+1)= 13
           n=n+1
 #endif
@@ -560,6 +563,8 @@ C**** GLOBAL parameters and variables:
       USE GEOM, only: lat2d_dg
       use model_com, only: modelEclock
       USE RAD_COM,only: tau_as
+      ! osipov
+      use rad_com, only: spectral_tau_ext, spectral_tau_sca,n_spectral_bands
       USE RADPAR, only : nraero_aod=>ntrace
 #ifdef TRACERS_ON
       use OldTracer_mod, only: trname
@@ -587,6 +592,9 @@ C**** Local parameters and variables and arguments:
 #ifdef TRACERS_ON
 c Zero aerosol and cloud column
       AER2(:,:) = 0.d0
+      ! osipov
+      fastj_spectral_tau_ext(:,:,:) = 0.d0
+      fastj_spectral_tau_sca(:,:,:) = 0.d0
 #endif
 
 c  Set up cloud and surface properties
@@ -678,11 +686,15 @@ c Now do the rest of the aerosols
 #ifdef TRACERS_AMP
       if (aerosols_affect_photolysis == 1) then
         !osipov there is only one aerosol mixture and 2 clouds
-        !osipov //TODO: currently it is sulfate optical depth, replace it with the mixture AOD
-        !osipov //TODO: check that it is actually the sulfate OD
+        !osipov TODO: currently it is sulfate optical depth, replace it with the mixture AOD
+        !osipov TODO: check that it is actually the sulfate OD
         !osipov see the TRAMP_config for a list of aerosols, line 240
-        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
-     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
+        ! osipov TODO: this has to be ACC (index 2) and OCC (index 9)
+!        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
+!     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
+        ! osipov this is only the aerosols, have to add clouds later
+        fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) = spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
+        fastj_spectral_tau_sca(1:NLGCM,:,1:nraero_aod) = spectral_tau_sca(NSLON,NSLAT,1:NLGCM,:,:)
       endif
 #endif
 
@@ -690,14 +702,14 @@ c Now do the rest of the aerosols
 !osipov in case of MATRIX sometimes there is sponteneously high AOD values for the super eruption case
 !osipov in case of OMA AOD get too high in general and at the poles
 !osipov //TODO: fix the fasj2 and remove this for-loop
-      do LL=1,NLGCM
-        if(AER2(LL,1) > 30.d0) then
-          AER2(LL,1) = 30.d0
-          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 30 and 
-     &          was replaced at i, j, k', NSLON, NSLAT, LL
-          call write_parallel(trim(out_line),crit=.true.)
-        endif
-      enddo
+!      do LL=1,NLGCM
+!        if(AER2(LL,1) > 30.d0) then
+!          AER2(LL,1) = 30.d0
+!          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 30 and 
+!     &          was replaced at i, j, k', NSLON, NSLAT, LL
+!          call write_parallel(trim(out_line),crit=.true.)
+!        endif
+!      enddo
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
@@ -711,8 +723,14 @@ c  Assume limiting temperature for ice of -40 deg C :
         endif
       enddo
 
+      ! osipov, add spectrally gray clouds (seems like a good assumption accordnig to fastj table species 7 and 11)
+      do wli=1:n_spectral_bands
+        fastj_spectral_tau_ext(:,wli,njaero) = odcol(:)
+      enddo
+
 c Top of the part of atmosphere passed to Fast-J2:
       AER2(NLGCM+1,:) = 0.d0
+      ! osipov TODO: check this spot
 #endif
 
 c  Calculate column quantities for Fast-J2:
@@ -1023,13 +1041,23 @@ C**** Local parameters and variables and arguments:
       INTEGER                    :: K,J
       INTEGER, INTENT(IN)        :: NSLON, NSLAT
       REAL*8, ALLOCATABLE, DIMENSION(:) :: XQO3_2, XQO2_2, XQSO2_2
+      ! osipov
+      REAL*8, ALLOCATABLE, DIMENSION(:,:) :: aerTauExt, aerTauSca
       REAL*8, ALLOCATABLE, DIMENSION(:) :: AVGF
       REAL*8                     :: WAVE
+      ! osipov TODO: reuse the array from RADIATION.f
+C                     L=    1     2     3     4     5        6
+C             WavA (nm)=  2200  1500  1250   860   770      300
+C             WavB (nm)=  4000  2200  1500  1250   860      770
+      real*8 OPwavelengths(6) = (/3100., 1850., 1375., 1055., 815., 535./)
 
       allocate( XQO3_2(NBFASTJ) )
       allocate( XQO2_2(NBFASTJ) )
-      !osipov
+      ! osipov
       allocate( XQSO2_2(NBFASTJ) )
+      allocate( aerTauExt(NBFASTJ, nraero_aod) )
+      allocate( aerTauSca(NBFASTJ, nraero_aod) )
+      
       allocate( AVGF(JPNL) )
 
       AVGF(:) = 0.d0   ! JPNL
@@ -1047,20 +1075,48 @@ C---Loop over all wavelength bins:
           !osipov
           XQSO2_2(J) = XSECSO2(K,TJ2(J))
         END DO
-        !osipov, pass additionally SO2
-        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,AVGF)
+
+        ! osipov extrapolate opt props to a given wavelength
+        call extrapolateOpticalProperty(fastj_spectral_tau_ext, OPwavelengths, aerTauExt, WAVE)
+        call extrapolateOpticalProperty(fastj_spectral_tau_sca, OPwavelengths, aerTauSca, WAVE)
+        
+        ! osipov, pass additionally SO2
+        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
       END DO
 
       deallocate( XQO3_2 )
       deallocate( XQO2_2 )
-      !osipov
+      ! osipov
       deallocate( XQSO2_2 )
+      deallocate( aerTauExt )
+      deallocate( aerTauSca )
+      
       deallocate( AVGF   )
 
       RETURN
       END SUBROUTINE JVALUE
 
+
+      subroutine extrapolateOpticalProperty(spectralOPin, wavelengthIn, OPOut, wavelengthOut)
+      ! osipov
+      ! This subroutine uses Ansgtrom exponent to extrapolate to target wavelength
+      implicit none
+      
+      ! dimensions are (vertical profile, wavelength, aerosol type)
+      REAL*8, INTENT(IN) :: spectralOPin(:,:,:), wavelengthIn(:)
+      REAL*8, INTENT(IN) :: OPOut(:,:), wavelengthOut
+      
+      REAL*8 :: angstromExponent
+      
+      !the wavelengths will be decreasing due to RADIATION.f
+      !get angstrom exponent, alpha=-1 * log(tau_lambda/tau_lambdaRef)/log(lambda/lamdaRef)
+      angstromExponent = -1 * log(spectralOPin(:,5,:)/spectralOPin(:,6,:)) / log(wavelengthIn(5)/wavelengthIn(6))
+      !use it to extrapolate
+      OPOut(:,:) = spectralOPin(:,6,:)*(wavelengthOut/wavelengthIn(6))**(-1*angstromExponent)
+      return
+      end subroutine extrapolateOpticalProperty
+      
       
 !osipov, this function really is not needed because there is almost no
 !osipov so2 sensetivity to temperature, but I've added just in case
@@ -1281,7 +1337,7 @@ c Lowest level intersected by emergent beam;
 
 
       
-      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2, XQSO2_2,FMEAN)
+      SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,FMEAN)
 !@sum OPMIE NEW Mie code for Js, only uses 8-term expansion, 
 !@+   4-Gauss pts.
 !@auth UCI (see note above), GCM incorporation: Drew Shindell,
@@ -1398,6 +1454,10 @@ C**** Local parameters and variables and arguments:
       REAL*8, allocatable, DIMENSION(:,:) :: PIAER2
       REAL*8, allocatable, DIMENSION(:,:) :: QXMIE,SSALB
       REAL*8, allocatable, DIMENSION(:) :: XLAER
+      ! osipov, aerosols (only) extinction and scattering wavelength at given wavelength
+      REAL*8, INTENT(IN) :: aerTauExt(:,:)
+      REAL*8, INTENT(IN) :: aerTauSca(:,:)
+      
 #endif
       REAL*8, INTENT(IN) :: WAVEL
       REAL*8, DIMENSION(2*M__) :: dpomega,dpomega2
@@ -1477,7 +1537,9 @@ C---Set up total optical depth over each CTM level, DTAUX:
           DTAUX(J)=DTAUX(J)+XLSO2
         endif
 #ifdef TRACERS_ON
-        XLAER(:)=AER2(J,:)*QXMIE(:,J) ! njaero
+        !XLAER(:)=AER2(J,:)*QXMIE(:,J) ! njaero
+        ! osipov
+        XLAER(:)=aerTauExt(J,:)! njaero
 c Total optical depth from all elements:
         do I=1,njaero
           DTAUX(J)=DTAUX(J)+XLAER(I)
@@ -1486,7 +1548,9 @@ c Total optical depth from all elements:
 c Fractional extinction for Rayleigh scattering and each aerosol type:
         PIRAY2(J)=XLRAY/DTAUX(J)
 #ifdef TRACERS_ON
-        PIAER2(:,J)=SSALB(:,J)*XLAER(:)/DTAUX(J) ! njaero
+        !PIAER2(:,J)=SSALB(:,J)*XLAER(:)/DTAUX(J) ! njaero
+        ! osipov
+        PIAER2(:,J)=aerTauSca(J,:)/DTAUX(J) ! njaero
 #endif
       enddo ! J
 

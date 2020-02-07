@@ -190,6 +190,12 @@ C**** does not produce exactly the same as the default values.
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:) :: tau_as
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:) :: tau_cs
       REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:) :: tau_dry
+! osipov, to couple aerosols to photochemistry, store spectral optical properties
+      ! TODO: this should come from RADIATION.f, number of wavelength bands
+      integer :: n_spectral_bands = 6
+! osipov, store extinction and scattering optical depths, to get tau and ssa later
+      REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:,:) :: spectral_tau_ext
+      REAL*8,ALLOCATABLE,DIMENSION(:,:,:,:,:) :: spectral_tau_sca
 #ifdef CACHED_SUBDD
 !@var abstau_as Same as tau_as for absorption
 !@var abstau_cs Same as tau_cs for absorption
@@ -798,6 +804,7 @@ C**** Local variables initialised in init_RAD
           call defvar(grid,fid,tau_dry,
      &         'tau_dry(dist_im,dist_jm,lm,nraero_aod)')
         endif
+        ! osipov, couple aerosols to photochemistry. TODO: maybe add spectral_tau_ext to restart
 #ifdef CACHED_SUBDD
         call defvar(grid,fid,abstau_as,
      &       'abstau_as(dist_im,dist_jm,lm,nraero_aod)')
@@ -958,6 +965,9 @@ C**** Local variables initialised in init_RAD
             if (save_dry_aod>0) then
               allocate(tau_dry(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             endif
+            ! osipov TODO: check it restart logic is really necessary
+            allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bands,nraero_aod_rsf))
+            allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,n_spectral_bands,nraero_aod_rsf))
 #ifdef CACHED_SUBDD
             allocate(abstau_as(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             allocate(abstau_cs(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
