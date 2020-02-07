@@ -70,7 +70,8 @@ C****
 #endif
 #ifdef TRACERS_SPECIAL_Shindell
       use photolysis, only: aer2,miedx2,nbfastj
-     *     ,fastj_spectral_tau_ext,fastj_spectral_tau_sca,fastj_spectral_g  ! osipov
+     *     ,fastj_spectral_tau_ext,fastj_spectral_tau_sca
+     *     ,fastj_spectral_g  ! osipov
 #endif  /* TRACERS_SPECIAL_Shindell */
 #ifdef TRACERS_ON
       use rad_com, only: nraero_rf,nraero_seasalt,
