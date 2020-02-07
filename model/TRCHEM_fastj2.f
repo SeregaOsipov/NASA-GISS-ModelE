@@ -1104,6 +1104,7 @@ C---Loop over all wavelength bins:
      &                                  OPwavelengths, aerTauExt, WAVE)
         call extrapolateOpticalProperty(fastj_spectral_tau_sca,
      &                                  OPwavelengths, aerTauSca, WAVE)
+        ! osipov, TODO: extrapolate g
         
         ! osipov, pass additionally SO2
         CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,

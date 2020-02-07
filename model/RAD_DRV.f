@@ -3260,6 +3260,10 @@ c               print*,'SUSA  diag',SUM(aesqex(1:Lm,kr,n))
         if (save_dry_aod>0) then
           tau_dry(i,j,1:LM,1:nraero_aod)=aesqex_dry(1:LM,6,1:nraero_aod)
         endif
+        ! osipov couple aerosols to fast-j2
+        spectral_tau_ext(i,j,1:LM,:,1:nraero_aod)=aesqex(1:LM,:,1:nraero_aod)
+        spectral_tau_sca(i,j,1:LM,:,1:nraero_aod)=aesqsc(1:LM,:,1:nraero_aod)
+        spectral_g(i,j,1:LM,:,1:nraero_aod)=aesqcb(1:LM,:,1:nraero_aod)
 #ifdef CACHED_SUBDD
         abstau_as(i,j,1:LM,1:nraero_aod)=
      &    (aesqex(1:LM,6,1:nraero_aod)-aesqsc(1:LM,6,1:nraero_aod))
