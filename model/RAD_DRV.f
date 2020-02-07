@@ -1671,6 +1671,7 @@ C     OUTPUT DATA
 #endif
 #ifdef TRACERS_ON
       use rad_com, only: tau_as,tau_cs,tau_dry,nraero_rf
+     &     ,spectral_tau_ext,spectral_tau_sca,spectral_g  ! osipov
 #ifdef CACHED_SUBDD
       USE CONSTANT, only : grav,Rgas
       use rad_com, only: abstau_as,abstau_cs,abstau_dry,swfrc,lwfrc
@@ -3261,8 +3262,10 @@ c               print*,'SUSA  diag',SUM(aesqex(1:Lm,kr,n))
           tau_dry(i,j,1:LM,1:nraero_aod)=aesqex_dry(1:LM,6,1:nraero_aod)
         endif
         ! osipov couple aerosols to fast-j2
-        spectral_tau_ext(i,j,1:LM,:,1:nraero_aod)=aesqex(1:LM,:,1:nraero_aod)
-        spectral_tau_sca(i,j,1:LM,:,1:nraero_aod)=aesqsc(1:LM,:,1:nraero_aod)
+        spectral_tau_ext(i,j,1:LM,:,1:nraero_aod)=
+     &    aesqex(1:LM,:,1:nraero_aod)
+        spectral_tau_sca(i,j,1:LM,:,1:nraero_aod)=
+     &    aesqsc(1:LM,:,1:nraero_aod)
         spectral_g(i,j,1:LM,:,1:nraero_aod)=aesqcb(1:LM,:,1:nraero_aod)
 #ifdef CACHED_SUBDD
         abstau_as(i,j,1:LM,1:nraero_aod)=
