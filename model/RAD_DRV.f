@@ -69,7 +69,7 @@ C****
      *     ,FS8OPX_orig,FT8OPX_orig
 #endif
 #ifdef TRACERS_SPECIAL_Shindell
-      use photolysis, only: aer2,miedx2,nbfastj
+      use photolysis, only: aer2,nbfastj  ! miedx2, osipov
      *     ,fastj_spectral_tau_ext,fastj_spectral_tau_sca
      *     ,fastj_spectral_g  ! osipov
 #endif  /* TRACERS_SPECIAL_Shindell */
@@ -693,12 +693,13 @@ caer   KRHTRA=(/1,1,1,1,1,1,1,1/)
       ! osipov For now separate new aerosols logic and old clouds, it can be merged later 
       njaero=nraero_aod+2
 #endif
-      allocate(miedx2(nbfastj,njaero))
+! osipov
+!      allocate(miedx2(nbfastj,njaero))
       allocate(aer2(nbfastj,njaero))
       ! osipov
-      allocate(fastj_spectral_tau_ext(n_spectral_bands,nbfastj,njaero))
-      allocate(fastj_spectral_tau_sca(n_spectral_bands,nbfastj,njaero))
-      allocate(fastj_spectral_g(n_spectral_bands,nbfastj,njaero))
+      allocate(fastj_spectral_tau_ext(nbfastj,n_spectral_bands,njaero))
+      allocate(fastj_spectral_tau_sca(nbfastj,n_spectral_bands,njaero))
+      allocate(fastj_spectral_g(nbfastj,n_spectral_bands,njaero))
 #endif  /* TRACERS_SPECIAL_Shindell */
 
 !=======================================================================

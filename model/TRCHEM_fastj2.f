@@ -76,7 +76,8 @@
 !@+                              aerosol vertical profiles. Only works with OMA.
       integer :: aerosols_affect_photolysis=1
 !@param miedx2 choice of aerosol types for fastj2
-      integer, allocatable, dimension(:,:) :: miedx2
+! osipov
+!      integer, allocatable, dimension(:,:) :: miedx2
 !@var aer2 fastj2 aerosol and cloud optical depth profiles. Aerosols are
 !@+   elements 1 to njaero-2, water clouds element njaero-1,
 !@+   and ice clouds element njaero. The water/ice threshold is
@@ -296,6 +297,8 @@
       use rad_com, only: nraero_koch,nraero_nitrate,nraero_dust,
      &                   nraero_seasalt
       use domain_decomp_1d, only: am_i_root
+      ! osipov
+      USE RADPAR, only : nraero_aod=>ntrace
       implicit none
 
 !@var rh humidity profile used to choose scattering input for FASTJ2
@@ -366,39 +369,39 @@ c       19 = Ice Clouds
 ! in the lines below, +0 implies no humidity impact
           n=0
 #ifdef TRACERS_AEROSOLS_SEASALT
-          MIEDX2(LL,n+1:n+nraero_seasalt)=(/20+irh,28+irh/)
+!          MIEDX2(LL,n+1:n+nraero_seasalt)=(/20+irh,28+irh/)
           n=n+nraero_seasalt
 #endif  /* TRACERS_AEROSOLS_SEASALT */
 
 #ifdef TRACERS_AEROSOLS_Koch
-          MIEDX2(LL,n+1)=12+irh
+!          MIEDX2(LL,n+1)=12+irh
 #ifndef SULF_ONLY_AEROSOLS
-          MIEDX2(LL,n+2:n+nraero_koch)=(/
+!          MIEDX2(LL,n+2:n+nraero_koch)=(/
 #ifdef TRACERS_AEROSOLS_VBS
-     &        36+irh
+!     &        36+irh
 #else
-     &        36+irh,36+irh
+!     &        36+irh,36+irh
 #endif  /* TRACERS_AEROSOLS_VBS */
 #ifdef TRACERS_AEROSOLS_SOA
-     &       ,36+irh
+!     &       ,36+irh
 #endif  /* TRACERS_AEROSOLS_SOA */
-     &       ,44+0,44+0/)
+!     &       ,44+0,44+0/)
 #endif  /* SULF_ONLY_AEROSOLS */
           n=n+nraero_koch
 #endif  /* TRACERS_AEROSOLS_Koch */
 
 #ifdef TRACERS_NITRATE
-          MIEDX2(LL,n+1:n+nraero_nitrate)=(/45+irh/)
+!          MIEDX2(LL,n+1:n+nraero_nitrate)=(/45+irh/)
           n=n+nraero_nitrate
 #endif  /* TRACERS_NITRATE */
 
 #ifdef TRACERS_DUST
-          MIEDX2(LL,n+1:n+nraero_dust)=
-     &      (/53+0,54+0,55+0,56+0,57+0,58+0,59+0
+!          MIEDX2(LL,n+1:n+nraero_dust)=
+!     &      (/53+0,54+0,55+0,56+0,57+0,58+0,59+0
 #ifdef TRACERS_DUST_Silt4
-     &       ,60+0
+!     &       ,60+0
 #endif  /* TRACERS_DUST_Silt4 */
-     &       /)
+!     &       /)
           n=n+nraero_dust
 #endif  /* TRACERS_DUST */
 
@@ -406,26 +409,29 @@ c       19 = Ice Clouds
 #ifdef TRACERS_AMP
           ! osipov, The Miedx2 logic now is redundant. I am passing the spectral OP from outside into photochemistry
           ! osipov, these spectral OP already has all the information incorporated: RI, size distribution, mixing and so on
-          MIEDX2(LL,n+1)= 13
-          n=n+1
+!          MIEDX2(LL,n+1)= 13
+          n=n+nraero_aod
 #endif
 
-          MIEDX2(LL,n+1:njaero)=(/7+0,11+0/)
+!          MIEDX2(LL,n+1:njaero)=(/7+0,11+0/)
         enddo 
 
 c Now force extra level (top of the atmosphere) used in Fast-J
 c to have the same MIEDX2 as the top model level
-        MIEDX2(NLGCM+1,1:njaero)=MIEDX2(NLGCM,1:njaero)
+! osipov
+!        MIEDX2(NLGCM+1,1:njaero)=MIEDX2(NLGCM,1:njaero)
 c  Ensure all aerosol types are valid selections:
-        do LL=1,NLGCM+1
-          do ii=1,njaero
-            if(MIEDX2(LL,ii)>NAA .or. MIEDX2(LL,ii)<=0) then
-              write(out_line,1201) MIEDX2(LL,ii),NAA
-              call write_parallel(trim(out_line),crit=.true.)
-              call stop_model('Problem with MIEDX2 aerosol types',13)
-            endif
-          enddo
-        enddo
+
+!osipov
+!        do LL=1,NLGCM+1
+!          do ii=1,njaero
+!            if(MIEDX2(LL,ii)>NAA .or. MIEDX2(LL,ii)<=0) then
+!              write(out_line,1201) MIEDX2(LL,ii),NAA
+!              call write_parallel(trim(out_line),crit=.true.)
+!              call stop_model('Problem with MIEDX2 aerosol types',13)
+!            endif
+!          enddo
+!        enddo
  1201 format('Aerosol type ',i2,' unsuitable; supplied values must be',
      &       ' between 1 and ',i2)
 #endif  /* TRACERS_ON */
@@ -729,25 +735,25 @@ c  Assume limiting temperature for ice of -40 deg C :
 
       ! osipov, TODO: get proper spectral dependence for clouds      
       do wli=1,n_spectral_bands
-	    do LL=1,NLGCM
-	      if(TFASTJ(LL) > 233.d0) then
-	        ! osipov, OD is currently spectrally gray (seems like a good assumption according to fastj table species 7 and 11)
+        do LL=1,NLGCM
+          if(TFASTJ(LL) > 233.d0) then
+            ! osipov, OD is currently spectrally gray (seems like a good assumption according to fastj table species 7 and 11)
             ! osipov, asssume SSA=1 for clouds
             fastj_spectral_tau_ext(LL,wli,njaero-1) = odcol(LL)
             fastj_spectral_tau_ext(LL,wli,njaero) = 0
             fastj_spectral_tau_sca(LL,wli,njaero-1) = odcol(LL)
             fastj_spectral_tau_sca(LL,wli,njaero) = 0
-	      else
+          else
             fastj_spectral_tau_ext(LL,wli,njaero-1) = 0
             fastj_spectral_tau_ext(LL,wli,njaero) = odcol(LL)
             fastj_spectral_tau_sca(LL,wli,njaero-1) = 0
             fastj_spectral_tau_sca(LL,wli,njaero) = odcol(LL)
-	      endif
-	    enddo
-	    
+          endif        
+        enddo
+
         ! osipov, TODO: get proper phase function calculations, for now it is spectrally gray
-        fastj_spectral_tau_sca(:,wli,njaero-1) = 4.002 ! data copied from jv_spec
-        fastj_spectral_tau_sca(:,wli,njaero) = 3.164
+        fastj_spectral_g(:,wli,njaero-1) = 0.87 ! data copied from jv_spec, w_n=(2n+1)*g**n
+        fastj_spectral_g(:,wli,njaero) = 0.75233
       enddo
 
 c Top of the part of atmosphere passed to Fast-J2:
@@ -1060,11 +1066,11 @@ C**** Local parameters and variables and arguments:
 !@var XQSO2_2   fastj2 Absorption cross-section of S2
 !@var WAVE Effective wavelength of each wavelength bin
 !@var AVGF Attenuation of beam at each level for each wavelength
-      INTEGER                    :: K,J
+      INTEGER                    :: K,J,I
       INTEGER, INTENT(IN)        :: NSLON, NSLAT
       REAL*8, ALLOCATABLE, DIMENSION(:) :: XQO3_2, XQO2_2, XQSO2_2
       ! osipov
-      REAL*8, ALLOCATABLE, DIMENSION(:,:) :: aerTauExt, aerTauSca
+      REAL*8, ALLOCATABLE, DIMENSION(:,:) :: aerTauExt, aerTauSca,aerAsy
       REAL*8, ALLOCATABLE, DIMENSION(:) :: AVGF
       REAL*8                     :: WAVE
       ! osipov TODO: reuse the array from RADIATION.f
@@ -1073,6 +1079,7 @@ C             WavA (nm)=  2200  1500  1250   860   770      300
 C             WavB (nm)=  4000  2200  1500  1250   860      770
       real*8, parameter :: OPwavelengths(6) = (/3100., 1850., 1375.,
      &                                        1055., 815., 535./)
+      real*8, DIMENSION(nbfastj,njaero) :: slope ! osipov, for g extrapolation
 
       allocate( XQO3_2(NBFASTJ) )
       allocate( XQO2_2(NBFASTJ) )
@@ -1080,7 +1087,8 @@ C             WavB (nm)=  4000  2200  1500  1250   860      770
       allocate( XQSO2_2(NBFASTJ) )
       allocate( aerTauExt(NBFASTJ, njaero) )
       allocate( aerTauSca(NBFASTJ, njaero) )
-      
+      allocate( aerAsy(NBFASTJ, njaero) )     
+ 
       allocate( AVGF(JPNL) )
 
       AVGF(:) = 0.d0   ! JPNL
@@ -1104,11 +1112,35 @@ C---Loop over all wavelength bins:
      &                                  OPwavelengths, aerTauExt, WAVE)
         call extrapolateOpticalProperty(fastj_spectral_tau_sca,
      &                                  OPwavelengths, aerTauSca, WAVE)
-        ! osipov, TODO: extrapolate g
+        ! osipov, for g do simple linear extrapolation
+        slope(:,:) = (fastj_spectral_g(:,5,:)-fastj_spectral_g(:,6,:))/
+     &    (OPwavelengths(5)-OPwavelengths(6))
+        aerAsy(:,:) = fastj_spectral_g(:,6,:)+slope(:,:)*
+     &    (WAVE-OPwavelengths(6))
+        ! osipov extrapolation can produce unphysical values, make sure that new SSA is [0,1] and new g is [-1;1]
+        do J=1,NBFASTJ
+          do I=1,njaero
+            if (aerTauExt(J,I).lt.0) then
+              aerTauExt(J,I) = 0.d0
+            end if
+            if (aerTauSca(J,I).lt.0) then
+              aerTauSca(J,I) = 0.d0
+            end if
+            if (aerTauSca(J,I).gt.aerTauExt(J,I)) then
+              aerTauSca(J,I) = aerTauExt(J,I)  ! osipov, SSA>1 case
+            end if
+            if (aerAsy(J,I).lt.0) then
+              aerAsy(J,I) = 0.d0
+            end if
+            if (aerAsy(J,I).gt.1) then
+              aerAsy(J,I) = 1.d0
+            end if
+          end do
+        end do
         
         ! osipov, pass additionally SO2
         CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,
-     &             AVGF)
+     &             aerAsy,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
       END DO
 
@@ -1118,6 +1150,7 @@ C---Loop over all wavelength bins:
       deallocate( XQSO2_2 )
       deallocate( aerTauExt )
       deallocate( aerTauSca )
+      deallocate( aerAsy )
       
       deallocate( AVGF   )
 
@@ -1137,15 +1170,24 @@ C---Loop over all wavelength bins:
       REAL*8, INTENT(IN) :: wavelengthOut
       REAL*8, INTENT(INOUT) :: OPOut(:,:)
       
-      REAL*8, dimension(nbfastj,njaero) :: angstromExponent
+      REAL*8 :: angstromExponent
+      integer :: k,i
 
-      !the wavelengths will be decreasing due to RADIATION.f
-      !get angstrom exponent, alpha=-1 * log(tau_lambda/tau_lambdaRef)/log(lambda/lamdaRef)
-      angstromExponent =-1*log(spectralOPin(:,5,:)/spectralOPin(:,6,:))
-     &                   / log(wavelengthIn(5)/wavelengthIn(6))
-      !use it to extrapolate
-      OPOut(:,:) = spectralOPin(:,6,:)*
+      do k=1,nbfastj
+        do i=1,njaero
+          OPOut(k,i) = 0.d0          
+          if (spectralOPin(k,5,i).ne.0 .and.
+     &        spectralOPin(k,6,i).ne.0) then
+            !the wavelengths will be decreasing due to RADIATION.f
+            !get angstrom exponent, alpha=-1 * log(tau_lambda/tau_lambdaRef)/log(lambda/lamdaRef)
+            angstromExponent =-1*log(spectralOPin(k,5,i)/
+     &        spectralOPin(k,6,i))/log(wavelengthIn(5)/wavelengthIn(6))
+            !use it to extrapolate
+            OPOut(k,i) = spectralOPin(k,6,i)*
      &            (wavelengthOut/wavelengthIn(6))**(-1*angstromExponent)
+          end if
+        end do
+      end do
       return
       end subroutine extrapolateOpticalProperty
       
@@ -1370,7 +1412,7 @@ c Lowest level intersected by emergent beam;
 
       
       SUBROUTINE OPMIE(KW,WAVEL,XQO2_2,XQO3_2,XQSO2_2,
-     &                 aerTauExt,aerTauSca,FMEAN)
+     &                 aerTauExt,aerTauSca,aerAsy,FMEAN)
 !@sum OPMIE NEW Mie code for Js, only uses 8-term expansion, 
 !@+   4-Gauss pts.
 !@auth UCI (see note above), GCM incorporation: Drew Shindell,
@@ -1485,11 +1527,13 @@ C**** Local parameters and variables and arguments:
       REAL*8, INTENT(OUT) :: FMEAN(:)
 #ifdef TRACERS_ON
       REAL*8, allocatable, DIMENSION(:,:) :: PIAER2
-      REAL*8, allocatable, DIMENSION(:,:) :: QXMIE,SSALB
+! osipov
+!      REAL*8, allocatable, DIMENSION(:,:) :: QXMIE,SSALB
       REAL*8, allocatable, DIMENSION(:) :: XLAER
       ! osipov, aerosols (only) extinction and scattering wavelength at given wavelength
       REAL*8, INTENT(IN) :: aerTauExt(:,:)
       REAL*8, INTENT(IN) :: aerTauSca(:,:)
+      REAL*8, INTENT(IN) :: aerAsy(:,:)
       
 #endif
       REAL*8, INTENT(IN) :: WAVEL
@@ -1501,6 +1545,8 @@ C**** Local parameters and variables and arguments:
       logical :: do_scattering = .true.      
       ! osipov, gases absorption OD
       real*8 :: gasesabsod
+      ! osipov, w_n is the coefficient for Legendre expansion
+      real*8 :: w_n
 
       allocate( DTAUX(NBFASTJ) )
       allocate( PIRAY2(NBFASTJ) )
@@ -1519,13 +1565,14 @@ C---Pick nearest Mie wavelength, no interpolation--------------
 C---For Mie code scale extinction at 1000 nm to wavelength WAVEL(QXMIE)
 #ifdef TRACERS_ON
       allocate(piaer2(njaero,NBFASTJ))
-      allocate(qxmie(njaero,NBFASTJ))
-      allocate(ssalb(njaero,NBFASTJ))
       allocate(xlaer(njaero))
-      do j=1,NBFASTJ
-        QXMIE(:,j) = QAAFASTJ(KM,MIEDX2(j,:)) / QAAFASTJ(4,MIEDX2(j,:))
-        SSALB(:,j) = SSA(KM,MIEDX2(j,:))
-      enddo
+! osipov
+!      allocate(qxmie(njaero,NBFASTJ))
+!      allocate(ssalb(njaero,NBFASTJ))
+!      do j=1,NBFASTJ
+!        QXMIE(:,j) = QAAFASTJ(KM,MIEDX2(j,:)) / QAAFASTJ(4,MIEDX2(j,:))
+!        SSALB(:,j) = SSA(KM,MIEDX2(j,:))
+!      enddo
 #endif
 
 C---Reinitialize arrays: ! loop 1,NCFASTJ2+1
@@ -1626,7 +1673,17 @@ C No. of quadrature pts fixed at 4 (M__), expansion of phase fn @ 8
          pomegaj(i,j) = PIRAY2(J)*PAA(i,KM,1)
 #ifdef TRACERS_ON
          do k=1,njaero
-          pomegaj(i,j)=pomegaj(i,j)+PIAER2(K,j)*PAA(i,KM,MIEDX2(j,K))
+          ! osipov couple aerosols to fast-j2
+          ! replace the table values with the Mie calculations from the RADIATION.f
+          ! PAA provides coefficient of the phase function expansion in Legendre polynomials
+          ! here I use the Henyey-Greenstein appoximation, it has analytical expansion in which
+          ! w_n = (2n+1)g**n, where g is the asemmetry parameter
+          ! TODO: it is better to use the full phase function from the Mie and calculate the coefficients
+
+          !pomegaj(i,j)=pomegaj(i,j)+PIAER2(K,j)*PAA(i,KM,MIEDX2(j,K))
+!          w_n = (2*i+1)*aerAsy(j,k)**i
+          w_n = (2*(i-1)+1)*aerAsy(j,k)**(i-1) ! expansion indexing starts from 0
+          pomegaj(i,j)=pomegaj(i,j)+PIAER2(K,j)*w_n
          enddo
 #endif
         enddo
@@ -1853,8 +1910,9 @@ c Accumulate attenuation for selected levels:
       deallocate( FTAU )
 #ifdef TRACERS_ON
       deallocate( piaer2 )
-      deallocate( qxmie )
-      deallocate( ssalb )
+! osipov
+!      deallocate( qxmie )
+!      deallocate( ssalb )
       deallocate( xlaer )
 #endif
 
