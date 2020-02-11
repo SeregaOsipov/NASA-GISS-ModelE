@@ -805,7 +805,16 @@ C**** Local variables initialised in init_RAD
           call defvar(grid,fid,tau_dry,
      &         'tau_dry(dist_im,dist_jm,lm,nraero_aod)')
         endif
-        ! osipov, couple aerosols to photochemistry. TODO: maybe add spectral_tau_ext to restart
+        ! osipov, couple aerosols to photochemistry.Add spectral_tau_ext to restart
+        call defvar(grid,fid,spectral_tau_ext,
+     &       'spectral_tau_ext(dist_im,dist_jm,lm,n_spectral_bands,
+     &        nraero_aod)')
+        call defvar(grid,fid,spectral_tau_sca,
+     &       'spectral_tau_sca(dist_im,dist_jm,lm,n_spectral_bands,
+     &        nraero_aod)')
+        call defvar(grid,fid,spectral_g,
+     &       'spectral_g(dist_im,dist_jm,lm,n_spectral_bands,
+     &        nraero_aod)')
 #ifdef CACHED_SUBDD
         call defvar(grid,fid,abstau_as,
      &       'abstau_as(dist_im,dist_jm,lm,nraero_aod)')
@@ -908,6 +917,12 @@ C**** Local variables initialised in init_RAD
           if (save_dry_aod>0) then
             call write_dist_data(grid,fid,'tau_dry',tau_dry)
           endif
+! osipov, aerosols coupling to fastj
+          call write_dist_data(grid,fid,'spectral_tau_ext',
+     &      spectral_tau_ext)
+          call write_dist_data(grid,fid,'spectral_tau_sca',
+     &      spectral_tau_sca)
+          call write_dist_data(grid,fid,'spectral_g',spectral_g)
 #ifdef CACHED_SUBDD
           call write_dist_data(grid,fid,'abstau_as',abstau_as)
           call write_dist_data(grid,fid,'abstau_cs',abstau_cs)
@@ -966,7 +981,7 @@ C**** Local variables initialised in init_RAD
             if (save_dry_aod>0) then
               allocate(tau_dry(I_0H:I_1H,J_0H:J_1H,lm,nraero_aod_rsf))
             endif
-            ! osipov TODO: check it restart logic is really necessary
+            ! osipov restart logic
             allocate(spectral_tau_ext(I_0H:I_1H,J_0H:J_1H,lm,
      &               n_spectral_bands,nraero_aod_rsf))
             allocate(spectral_tau_sca(I_0H:I_1H,J_0H:J_1H,lm,
@@ -994,6 +1009,13 @@ C**** Local variables initialised in init_RAD
           if (save_dry_aod>0) then
             call read_dist_data(grid,fid,'tau_dry',tau_dry)
           endif
+          ! osipov
+          call read_dist_data(grid,fid,'spectral_tau_ext',
+     &      spectral_tau_ext)
+          call read_dist_data(grid,fid,'spectral_tau_sca',
+     &      spectral_tau_sca)
+          call read_dist_data(grid,fid,'spectral_g',spectral_g)
+
 #ifdef CACHED_SUBDD
           call read_dist_data(grid,fid,'abstau_as',abstau_as)
           call read_dist_data(grid,fid,'abstau_cs',abstau_cs)

@@ -1080,6 +1080,7 @@ C             WavB (nm)=  4000  2200  1500  1250   860      770
       real*8, parameter :: OPwavelengths(6) = (/3100., 1850., 1375.,
      &                                        1055., 815., 535./)
       real*8, DIMENSION(nbfastj,njaero) :: slope ! osipov, for g extrapolation
+      character(len=300) :: out_line
 
       allocate( XQO3_2(NBFASTJ) )
       allocate( XQO2_2(NBFASTJ) )
@@ -1118,30 +1119,46 @@ C---Loop over all wavelength bins:
         aerAsy(:,:) = fastj_spectral_g(:,6,:)+slope(:,:)*
      &    (WAVE-OPwavelengths(6))
         ! osipov extrapolation can produce unphysical values, make sure that new SSA is [0,1] and new g is [-1;1]
-        do J=1,NBFASTJ
-          do I=1,njaero
-            if (aerTauExt(J,I).lt.0) then
-              aerTauExt(J,I) = 0.d0
-            end if
-            if (aerTauSca(J,I).lt.0) then
-              aerTauSca(J,I) = 0.d0
-            end if
-            if (aerTauSca(J,I).gt.aerTauExt(J,I)) then
-              aerTauSca(J,I) = aerTauExt(J,I)  ! osipov, SSA>1 case
-            end if
-            if (aerAsy(J,I).lt.0) then
-              aerAsy(J,I) = 0.d0
-            end if
-            if (aerAsy(J,I).gt.1) then
-              aerAsy(J,I) = 1.d0
-            end if
-          end do
-        end do
+        where (aerTauExt.lt.0.d0) aerTauExt = 0.d0
+        where (aerTauSca.lt.0.d0) aerTauSca = 0.d0
+        where (aerTauSca.gt.aerTauExt) aerTauSca = aerTauExt ! SSA>1 case
+        where (aerAsy.lt.-1.d0) aerAsy = -1.d0
+        where (aerAsy.gt.1.d0) aerAsy = 1.d0
+!        do J=1,NBFASTJ
+!          do I=1,njaero
+!            if (aerTauExt(J,I).lt.0) then
+!              aerTauExt(J,I) = 0.d0
+!            end if
+!            if (aerTauSca(J,I).lt.0) then
+!              aerTauSca(J,I) = 0.d0
+!            end if
+!            if (aerTauSca(J,I).gt.aerTauExt(J,I)) then
+!              aerTauSca(J,I) = aerTauExt(J,I)  ! osipov, SSA>1 case
+!            end if
+!            if (aerAsy(J,I).lt.0) then
+!              aerAsy(J,I) = 0.d0
+!            end if
+!            if (aerAsy(J,I).gt.1) then
+!              aerAsy(J,I) = 1.d0
+!            end if
+!          end do
+!        end do
         
-        ! osipov, pass additionally SO2
+        ! osipov, pass additionally SO2 and spectral optical properties of aerosols
         CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,
      &             aerAsy,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
+        ! osipov, TODO: fix me, temprorary replace >1 values with 1
+        if (any(AVGF.gt.1.d0)) then
+          write(out_line,*) 'Fast-j2 error:',
+     &      ' AVGF >1 replaced with 1!!!', maxval(AVGF)
+          call write_parallel(trim(out_line))
+        end if
+        where (AVGF.gt.1.d0) AVGF=1.d0
+        ! osipov, sanity check, avgf should be [0;1]
+        if (any(AVGF.gt.1).or.any(AVGF.lt.0).or.any(isnan(avgf))) then
+          call stop_model("Fast-j2: AVGF is outside [0;1]",255)
+        end if
       END DO
 
       deallocate( XQO3_2 )
