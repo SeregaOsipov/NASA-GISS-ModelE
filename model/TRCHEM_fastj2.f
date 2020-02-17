@@ -287,7 +287,8 @@
 
 
 
-      subroutine fastj2_drv(I, J, ta, rh, surfaceAlbedo, clouds_feedback)
+      subroutine fastj2_drv(I, J, ta, rh, surfaceAlbedo,
+     &                      clouds_feedback)  ! osipov, add flag
 !@sum fastj2_drv driver for photolysis. This subroutine needs to be
 !@+   standalone, any chemical mechanism-related code should be present in
 !@+   the chemical mechanism files itself, not here.
@@ -505,7 +506,7 @@ c Assign ks and kss gas numbers of photolysis reactants from list:
 
 
       subroutine photoj(nslon,nslat,surfaceAlbedo,
-      &                 clouds_feedback)  ! osipov
+     &                  clouds_feedback)  ! osipov
 !@sum from jv_trop.f: FAST J-Value code, troposphere only (mjprather
 !@+ 6/96). Uses special wavelength quadrature spectral data
 !@+ (jv_spec.dat) that includes only 289 nm - 800 nm (later a single
