@@ -40,12 +40,12 @@
 !@param nlevref number of reference levels for T/O3 profiles
       integer, parameter :: 
      &                      szamax=98.d0
-     &                     ,N__=5400 ! osipov increase 10 times
+     &                     ,N__=5400
      &                     ,M__=4
      &                     ,nfastj=4
      &                     ,mfastj=1
      &                     ,mfit=2*M__
-     &                     ,nlfastj=4200 ! osipov, increase 10 times to allow UV scattering calculations
+     &                     ,nlfastj=4200
      &                     ,njval=27 !formerly read in from jv_spec00_15.dat
      &                     ,nwfastj=18
      &                     ,np=60
@@ -287,7 +287,7 @@
 
 
 
-      subroutine fastj2_drv(I, J, ta, rh, surfaceAlbedo)
+      subroutine fastj2_drv(I, J, ta, rh, surfaceAlbedo, clouds_feedback)
 !@sum fastj2_drv driver for photolysis. This subroutine needs to be
 !@+   standalone, any chemical mechanism-related code should be present in
 !@+   the chemical mechanism files itself, not here.
@@ -306,6 +306,7 @@
       real*8, intent(in) :: rh(:)
       real*8, intent(in) :: surfaceAlbedo
       integer, intent(in) :: i, j ! current box horizontal indices
+      logical, intent(in) :: clouds_feedback  ! osipov, clouds feedback on fast-j2 
 
       character(len=300) :: out_line
       integer :: LL,ii,irh,n
@@ -441,7 +442,8 @@ c       define pressures to be sent to FASTJ (edges):
         PFASTJ2(NLGCM+2)=PFASTJ2(NLGCM+1)*0.2816 ! 0.00058d0/0.00206d0 ! fudge
         PFASTJ2(NLGCM+3)=PFASTJ2(NLGCM+2)*0.4828 ! 0.00028d0/0.00058d0 ! fudge
 
-        call photoj(I,J,surfaceAlbedo) ! CALL THE PHOTOLYSIS SCHEME
+        ! osipov, add feedback flags
+        call photoj(I,J,surfaceAlbedo,clouds_feedback) ! CALL THE PHOTOLYSIS SCHEME
       end subroutine fastj2_drv
 
 
@@ -502,7 +504,8 @@ c Assign ks and kss gas numbers of photolysis reactants from list:
 
 
 
-      subroutine photoj(nslon,nslat,surfaceAlbedo)
+      subroutine photoj(nslon,nslat,surfaceAlbedo,
+      &                 clouds_feedback)  ! osipov
 !@sum from jv_trop.f: FAST J-Value code, troposphere only (mjprather
 !@+ 6/96). Uses special wavelength quadrature spectral data
 !@+ (jv_spec.dat) that includes only 289 nm - 800 nm (later a single
@@ -528,6 +531,7 @@ C**** Local parameters and variables and arguments:
 !@var i,j,k dummy loop variables
       real*8, intent(IN) :: surfaceAlbedo
       INTEGER, INTENT(IN) :: nslon, nslat
+      logical, intent(in) :: clouds_feedback  ! osipov
       INTEGER             :: i,j,k
       logical             :: jay
       INTEGER             :: J_0, J_1 
@@ -541,7 +545,8 @@ C**** Local parameters and variables and arguments:
       U0 = DCOS(SZA*radian)
 
       if(SZA <= szamax)then 
-        CALL SET_PROF(NSLON,NSLAT,surfaceAlbedo)  ! Set up profiles on model levels
+        ! osipov, add feedback flag
+        CALL SET_PROF(NSLON,NSLAT,surfaceAlbedo,clouds_feedback)  ! Set up profiles on model levels
         IF(j_prnrts .and. NSLON == j_iprn .and. NSLAT == j_jprn)
      &  CALL PRTATM(2,NSLON,NSLAT,jay) ! Print out atmosphere
         CALL JVALUE(nslon,nslat)    ! Calculate actinic flux
@@ -553,7 +558,8 @@ c
 
 
 
-      subroutine set_prof(NSLON,NSLAT,surfaceAlbedo)
+      subroutine set_prof(NSLON,NSLAT,surfaceAlbedo,
+      &                   clouds_feedback)  ! osipov
 !@sum set_prof to set up atmospheric profiles required by Fast-J2 using
 !@+   a doubled version of the level scheme used in the CTM. First
 !@+   pressure and z* altitude are defined, then O3 and T are taken
@@ -573,6 +579,7 @@ C**** GLOBAL parameters and variables:
       ! osipov
       use rad_com, only: spectral_tau_ext, spectral_tau_sca,
      &                   spectral_g, n_spectral_bands
+      logical, intent(in) :: clouds_feedback  ! osipov
       USE RADPAR, only : nraero_aod=>ntrace
 #ifdef TRACERS_ON
       use OldTracer_mod, only: trname
@@ -704,30 +711,20 @@ c Now do the rest of the aerosols
       endif
 #endif
 
-!osipov limit the max aerosol OD for fastj calculation, because fastj can't handle them
-!osipov in case of MATRIX sometimes there is sponteneously high AOD values for the super eruption case
-!osipov in case of OMA AOD get too high in general and at the poles
-!osipov //TODO: fix the fasj2 and remove this for-loop
-!      do LL=1,NLGCM
-!        if(AER2(LL,1) > 30.d0) then
-!          AER2(LL,1) = 30.d0
-!          write(out_line,*) 'osipov diags, fastj2 AOD exceeded 30 and 
-!     &          was replaced at i, j, k', NSLON, NSLAT, LL
-!          call write_parallel(trim(out_line),crit=.true.)
-!        endif
-!      enddo
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
-      do LL=1,NLGCM
-        if(TFASTJ(LL) > 233.d0) then
-          AER2(LL,njaero-1) = odcol(LL)
-          AER2(LL,njaero) = 0.d0
-        else
-          AER2(LL,njaero-1) = 0.d0
-          AER2(LL,njaero) = odcol(LL)
-        endif
-      enddo
+      if (clouds_feedback) then  ! osipov, only include clouds if the feedback is ON
+	      do LL=1,NLGCM
+	        if(TFASTJ(LL) > 233.d0) then
+	          AER2(LL,njaero-1) = odcol(LL)
+	          AER2(LL,njaero) = 0.d0
+	        else
+	          AER2(LL,njaero-1) = 0.d0
+	          AER2(LL,njaero) = odcol(LL)
+	        endif
+	      enddo
+      end if
 
       ! osipov, TODO: get proper spectral dependence for clouds      
       do wli=1,n_spectral_bands
@@ -1114,35 +1111,16 @@ C---Loop over all wavelength bins:
      &    (OPwavelengths(5)-OPwavelengths(6))
         aerAsy(:,:) = fastj_spectral_g(:,6,:)+slope(:,:)*
      &    (WAVE-OPwavelengths(6))
-        ! osipov extrapolation can produce unphysical values, make sure that new SSA is [0,1] and new g is [-1;1]
+        ! osipov, extrapolation can produce unphysical values, make sure that new SSA is [0,1] and new g is [-1;1]
         where (aerTauExt.lt.0.d0) aerTauExt = 0.d0
         where (aerTauSca.lt.0.d0) aerTauSca = 0.d0
         where (aerTauSca.gt.aerTauExt) aerTauSca = aerTauExt ! SSA>1 case
         where (aerAsy.lt.-1.d0) aerAsy = -1.d0
         where (aerAsy.gt.1.d0) aerAsy = 1.d0
-!        do J=1,NBFASTJ
-!          do I=1,njaero
-!            if (aerTauExt(J,I).lt.0) then
-!              aerTauExt(J,I) = 0.d0
-!            end if
-!            if (aerTauSca(J,I).lt.0) then
-!              aerTauSca(J,I) = 0.d0
-!            end if
-!            if (aerTauSca(J,I).gt.aerTauExt(J,I)) then
-!              aerTauSca(J,I) = aerTauExt(J,I)  ! osipov, SSA>1 case
-!            end if
-!            if (aerAsy(J,I).lt.0) then
-!              aerAsy(J,I) = 0.d0
-!            end if
-!            if (aerAsy(J,I).gt.1) then
-!              aerAsy(J,I) = 1.d0
-!            end if
-!          end do
-!        end do
         
         ! osipov, pass additionally SO2 and spectral optical properties of aerosols
-        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,
-     &             aerAsy,AVGF)
+        CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,
+     &             aerTauExt,aerTauSca,aerAsy,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
 ! osipov, for debug looks like sometimes I can get negative values
 !        if (any(AVGF.lt.0)) then

@@ -4446,19 +4446,29 @@ c- 3D diagnostic per mode
       end select
       end do
 
-! osipov, add photlysis diagnostics
-! TODO: check power and units
+! osipov, add photlysis fast-j2 spectral actinic flux, clear-sky
+      do n=1,NWWW
+        k = k + 1
+         ijlt_af_cs(n)=k
+         write(temp_str , '(I2)') n
+         lname_ijlt(k) = 'actinic flux clear-sky in band '//trim(temp_str)
+         sname_ijlt(k) = 'act_flux_cs_b'//trim(adjustl(temp_str))//
+         ijlt_power(k) = 0
+         units_ijlt(k) = unit_string(ijlt_power(k),' photons sec**-1 cm**-2')
+         scale_ijlt(k) = 10.**(-ijlt_power(k))
+      end do
+      
+! osipov, add photlysis fast-j2 spectral actinic flux, all-sky
       do n=1,NWWW
         k = k + 1
          ijlt_af(n)=k
          write(temp_str , '(I2)') n
-         !print *,'osipov acf_flux_b'//temp_str
          lname_ijlt(k) = 'actinic flux in band '//trim(temp_str)
          sname_ijlt(k) = 'act_flux_b'//trim(adjustl(temp_str))
          ijlt_power(k) = 0
-         units_ijlt(k) = unit_string(ijlt_power(k),' NaN')
+         units_ijlt(k) = unit_string(ijlt_power(k),' photons sec**-1 cm**-2')
          scale_ijlt(k) = 10.**(-ijlt_power(k))
-      end do
+      end do      
 
 C**** 3D tracer-related arrays but not attached to any one tracer
 

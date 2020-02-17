@@ -255,6 +255,7 @@ C**** TAIJLS 3D special tracer diagnostics
 ! osipov, add fast j diagnostics to the output
 !@var ijlt_af actinic flux for N spectral band
 	  integer, allocatable :: ijlt_af(:)
+	  integer, allocatable :: ijlt_af_cs(:)
 !@var ijlt_aH2O aerosol H2O from thermodynamics (ug/m3)
 !@var ijlt_apH aerosol pH from thermodynamics (dimensionless)
       integer :: ijlt_aH2O,ijlt_apH
@@ -1538,7 +1539,9 @@ C*** Unpack read global data into local distributed arrays
 !	  allocate(ijlt_af(NWWW)
 ! osipov TODO replace 18 with var
           allocate(ijlt_af(18))
+          allocate(ijlt_af_cs(18))
 	  ijlt_af = 0
+	  ijlt_af_cs = 0
 	  
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT
       allocate(ijlt_3Dmass(ntm))

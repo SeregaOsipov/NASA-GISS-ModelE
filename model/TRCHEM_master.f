@@ -72,7 +72,6 @@ c
 #ifdef INTERACTIVE_WETLANDS_CH4
       USE TRACER_SOURCES, only: avg_model,n__sw
 #endif
-! osipov, add fast-j2 diags, ijlt_af
       USE TRDIAG_COM, only    : taijs=>taijs_loc,taijls=>taijls_loc
      &     ,ijlt_NO3,jls_COp,jls_COd,jls_Oxp,jls_N2O5sulf,jls_O3vmr
      &     ,jls_Oxd,jls_OxpT,jls_OxdT,ijs_NO2_1030,ijs_NO2_1030c
@@ -80,7 +79,8 @@ c
      &     ,ijlt_pOH,ijlt_OxpHO2,ijlt_OxpCH3O2,ijlt_OxlHO2,ijlt_OxlALK
      &     ,ijlt_OxlOH,ijs_NO2_1330,ijs_NO2_1330c,ijlt_NO2vmr,ijlt_NOvmr
      &     ,ijlt_JO1D,ijlt_JNO2,ijlt_JH2O2,ijlt_O3ppbv,ijlt_O3cmatm
-     &     ,jls_ClOcon,jls_H2Ocon,ijlt_af
+     &     ,jls_ClOcon,jls_H2Ocon
+     &     ,ijlt_af, ijlt_af_cs ! osipov, add fast-j2 spectral actinic flux (all-sky and clear-sky)
       USE TRCHEM_Shindell_COM
 #ifdef TRACERS_AEROSOLS_SOA
       USE TRACERS_SOA, only: soa_aerosolphase,voc2nox,soa_apart,
@@ -651,8 +651,28 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         END DO
 
 ! calculate photolysis rates
-        call fastj2_drv(I, J, ta, rh, albedoToUse)
+		!osipov add the fastj diags to the output
+		! osipov TODO: implement cs_flag
+		call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
+        ! osipov, all-sky actinic flux
+        DO L=min(JPNL,topLevelOfChemistry),1,-1
+          do n=1,NWWW
+          	taijls(i,j,L,ijlt_af_cs(n))=taijls(i,j,L,ijlt_af_cs(n))+fff(n, L)
+          end do
+        end do
+        
+        call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
+        
+        ! osipov, all-sky actinic flux
+        DO L=min(JPNL,topLevelOfChemistry),1,-1
+          do n=1,NWWW
+          	taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
+          end do
+        end do
+        
         call photo_acetone(I,J,sza*radian) ! simpler calculation for acetone
+        
+        
 
 C Define and alter resulting photolysis coefficients (zj --> ss):
 
@@ -730,11 +750,6 @@ C Define and alter resulting photolysis coefficients (zj --> ss):
      &    1.d-3*rgas*bygrav*TX(I,J,L)*LOG(PEDN(L,i,j)/PEDN(L+1,i,j))
           colmO2=colmO2+y(nO2,L)*thick*1.d5
           colmO3=colmO3+y(nO3,L)*thick*1.d5
-          
-          !osipov add the fastj diags to the output
-          do n=1,NWWW
-          	taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
-          end do
           
 ! SF3 is photolysis of water in Schumann-Runge bands based on:
 ! Nicolet, Pl. Space Sci., p 871, 1984.
