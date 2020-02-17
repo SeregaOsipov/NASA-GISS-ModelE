@@ -1642,6 +1642,7 @@ C     OUTPUT DATA
      &          ,BTEMPW ,SRAEXT ,SRASCT ,SRAGCB
      &          ,SRDEXT ,SRDSCT ,SRDGCB ,SRVEXT ,SRVSCT ,SRVGCB
      &          ,aesqex,aesqsc,aesqcb
+     &          ,aesasy  ! osipov
      &          ,aesqex_dry,aesqsc_dry,aesqcb_dry
      &          ,SRXNIR,SRDNIR
       USE RAD_COM, only : modrd,nrad,so2x
@@ -3267,7 +3268,7 @@ c               print*,'SUSA  diag',SUM(aesqex(1:Lm,kr,n))
      &    aesqex(1:LM,:,1:nraero_aod)
         spectral_tau_sca(i,j,1:LM,:,1:nraero_aod)=
      &    aesqsc(1:LM,:,1:nraero_aod)
-        spectral_g(i,j,1:LM,:,1:nraero_aod)=aesqcb(1:LM,:,1:nraero_aod)
+        spectral_g(i,j,1:LM,:,1:nraero_aod)=aesasy(1:LM,:,1:nraero_aod) !osipov, not aesqsb!!!
 #ifdef CACHED_SUBDD
         abstau_as(i,j,1:LM,1:nraero_aod)=
      &    (aesqex(1:LM,6,1:nraero_aod)-aesqsc(1:LM,6,1:nraero_aod))

@@ -32,7 +32,8 @@ c -----------------------------------------------------------------
       USE RESOLUTION,  only: lm
       USE MODEL_COM,   only: itime,itimeI
       USE TRACER_COM,  only: TRM
-      USE RADPAR,      only: aesqex,aesqsc,aesqcb,FSTOPX,FTTOPX,AMP_TAB_SPEC
+      USE RADPAR,      only: aesqex,aesqsc,aesqcb,FSTOPX,FTTOPX,AMP_TAB_SPEC,
+     &                       aesasy  ! osipov, couple aerosols to fast-j2
 
       IMPLICIT NONE
       INTEGER, save:: Ifirstrad = 1
@@ -153,6 +154,7 @@ c--------------------------------------------------------------------
           aesqex(l,w,n)= AMPEXT * TTAUSV(l,n) 
           aesqsc(l,w,n)= AMPSCA * TTAUSV(l,n) 
           aesqcb(l,w,n)= AMPASY * aesqsc(l,w,n)
+          aesasy(l,w,n)= AMPASY  ! osipov, store the asymmetry parameter
 
       ENDDO   ! wave
       ENDDO   ! modes
@@ -299,6 +301,7 @@ c--------------------------------------------------------------------
           aesqex(l,w,n)= AMPEXT * TTAUSV(l,n) 
           aesqsc(l,w,n)= AMPSCA * TTAUSV(l,n) 
           aesqcb(l,w,n)= AMPASY * aesqsc(l,w,n)
+          aesasy(l,w,n)= AMPASY  ! osipov
 
       ENDDO   ! wave
       ENDDO   ! modes

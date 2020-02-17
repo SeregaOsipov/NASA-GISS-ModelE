@@ -694,10 +694,6 @@ c Now do the rest of the aerosols
 !osipov aerosolf feedback on photolysis
 #ifdef TRACERS_AMP
       if (aerosols_affect_photolysis == 1) then
-        ! osipov TODO: this has to be ACC (index 2) and OCC (index 9)
-!        AER2(1:NLGCM,1)= tau_as(NSLON,NSLAT,1:NLGCM,1)+
-!     &                   tau_as(NSLON,NSLAT,1:NLGCM,2)
-
         ! osipov this is only the aerosols, have to add clouds later
         fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) =
      &    spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
@@ -1148,16 +1144,15 @@ C---Loop over all wavelength bins:
         CALL OPMIE(K,WAVE,XQO2_2,XQO3_2,XQSO2_2,aerTauExt,aerTauSca,
      &             aerAsy,AVGF)
         FFF(K,:) = FFF(K,:) + FL(K)*AVGF(:) ! 1,JPNL
-        ! osipov, TODO: fix me, temprorary replace >1 values with 1
-        if (any(AVGF.gt.1.d0)) then
-          write(out_line,*) 'Fast-j2 error:',
-     &      ' AVGF >1 replaced with 1!!!', maxval(AVGF)
-          call write_parallel(trim(out_line))
-        end if
-        where (AVGF.gt.1.d0) AVGF=1.d0
-        ! osipov, sanity check, avgf should be [0;1]
-        if (any(AVGF.gt.1).or.any(AVGF.lt.0).or.any(isnan(avgf))) then
-          call stop_model("Fast-j2: AVGF is outside [0;1]",255)
+! osipov, for debug looks like sometimes I can get negative values
+!        if (any(AVGF.lt.0)) then
+!          write(out_line,*) 'Fast-j2 error: negative AVGF',minval(AVGF)
+!          call write_parallel(trim(out_line))
+!        end if
+!        where (AVGF.lt.0.d0) AVGF=0.d0
+        ! osipov, sanity check, avgf should be positive
+        if (any(AVGF.lt.0).or.any(isnan(avgf))) then
+          call stop_model("Fast-j2: AVGF is negative or NaN",255)
         end if
       END DO
 
@@ -1917,6 +1912,10 @@ c Accumulate attenuation for selected levels:
             FMEAN(j) = FJFASTJ(k)
           endif
         enddo
+        ! osipov debuging
+!        if (any(FMEAN.lt.0.d0)) then
+!          write(*,*) "BINGO!"
+!        end if
 
       endif ! WAVEL
 

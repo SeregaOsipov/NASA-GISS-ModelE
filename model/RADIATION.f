@@ -202,6 +202,7 @@ C--------------------------------------------------------
 !@var aesqex_dry saves dry extinction aerosol optical thickness
 !@var aesqsc_dry saves dry scattering aerosol optical thickness
 !@var aesqcb_dry saves dry aerosol scattering asymmetry factor
+!@var aesasy, aerosol asymmetry parameter, osipov
 
       REAL*8 TRDFLB(LX+1),TRUFLB(LX+1),TRNFLB(LX+1), TRFCRL(LX)
       REAL*8 SRDFLB(LX+1),SRUFLB(LX+1),SRNFLB(LX+1), SRFHRL(LX)
@@ -219,6 +220,7 @@ C--------------------------------------------------------
 !nu  K      ,TRDFSL,TRUFSL,TRSLCR,SRSLHR,TRSLWV  !nu = not (yet) used
 !sl  K      ,TRSLTS,TRSLTG,TRSLBS
       REAL*8 aesqex(lx,6,itrmax),aesqsc(lx,6,itrmax),aesqcb(lx,6,itrmax)
+     &       ,aesasy(lx,6,itrmax)
       REAL*8 aesqex_dry(lx,6,itrmax),aesqsc_dry(lx,6,itrmax),
      &       aesqcb_dry(lx,6,itrmax)
       INTEGER :: LBOTCL,LTOPCL
@@ -3120,6 +3122,8 @@ C     ------------------------------------------------------------------
       aesqex(L,:,nt)=srtqex(:,nrhnan(L,na),nt)*rhftau           ! 1:6
       aesqsc(L,:,nt)=srtqsc(:,nrhnan(L,na),nt)*rhftau
       aesqcb(L,:,nt)=srtqcb(:,nrhnan(L,na),nt)*aesqsc(L,:,nt)
+      aesasy(L,:,nt)=srtqcb(:,nrhnan(L,na),nt)  ! osipov TODO: check that it is g
+
       aesqex_dry(L,:,nt)=srtqex(:,1,nt)*rhftau_dry           ! 1:6
       aesqsc_dry(L,:,nt)=srtqsc(:,1,nt)*rhftau_dry
       aesqcb_dry(L,:,nt)=srtqcb(:,1,nt)*aesqsc_dry(L,:,nt)
