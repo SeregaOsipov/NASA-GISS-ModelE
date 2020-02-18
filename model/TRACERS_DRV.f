@@ -3864,7 +3864,7 @@ c      end do
 
 ! osipov, add UV index, clear- and all-sky
       k = k + 1
-         ijt_uv_index=k
+         ijts_uv_index=k
          lname_ijts(k) = 'UV index (based on actinic flux)'
          sname_ijts(k) = 'uv_index'
          ijts_power(k) = 0
@@ -3872,7 +3872,7 @@ c      end do
          scale_ijts(k) = 10.**(-ijts_power(k))
          
       k = k + 1
-         ijt_uv_index_cs=k
+         ijts_uv_index_cs=k
          lname_ijts(k) = 'UV index clear-sky  (based on actinic flux)'
          sname_ijts(k) = 'uv_index_cs'
          ijts_power(k) = 0

@@ -1557,8 +1557,8 @@ C*** Unpack read global data into local distributed arrays
 
           ijlt_af = 0
           ijlt_af_cs = 0
-          ijlts_uv_index = 0
-          ijlts_uv_index_cs = 0
+          ijts_uv_index = 0
+          ijts_uv_index_cs = 0
  
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT
       allocate(ijlt_3Dmass(ntm))

@@ -221,7 +221,7 @@ C**** Local parameters and variables and arguments:
       
 ! osipov
       real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
-     &                  grid%j_strt_halo:grid%j_stop_halo,
+     &                  grid%j_strt_halo:grid%j_stop_halo)
      &                  :: uvIndex,uvIndexCS
 
       call modelEclock%get(hour=hour)
@@ -3098,7 +3098,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       implicit none
       
       real*8, intent(in) :: spectralFlux(:,:)
-      real*8, intent(out) :: uvIind(:)
+      real*8, intent(out) :: uvInd(:)
       integer, intent(in) :: Lmax
       integer :: L
       
