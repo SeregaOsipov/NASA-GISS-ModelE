@@ -2214,6 +2214,34 @@ c
      &  lname = 'Tropopause temperature',
      &  units = 'K'
      &     )
+c
+! osipov, add UV index (daily!)
+      arr(next()) = info_type_(
+     &  sname = 'uvindexmax',
+     &  lname = 'UV index daily max',
+     &  units = '',
+     &  reduc = reduc_max
+     &     )
+c
+      arr(next()) = info_type_(
+     &  sname = 'uvindex',
+     &  lname = 'UV index at solar noon',
+     &  units = ''
+     &     )
+c
+! osipov, same diags but clear-sky
+      arr(next()) = info_type_(
+     &  sname = 'uvindexcsmax',
+     &  lname = 'UV index clear-sky daily max',
+     &  units = '',
+     &  reduc = reduc_max
+     &     )
+c
+      arr(next()) = info_type_(
+     &  sname = 'uvindexcs',
+     &  lname = 'UV index clear-sky at solar noon',
+     &  units = ''
+     &     )
       return
       contains
       integer function next()

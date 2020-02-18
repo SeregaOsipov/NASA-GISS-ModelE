@@ -220,7 +220,9 @@ C**** Local parameters and variables and arguments:
       integer :: hour, idx
       
 ! osipov
-      real*8, dimension(LM) :: uvIndex      
+      real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
+     &                  grid%j_strt_halo:grid%j_stop_halo,
+     &                  LM) :: uvIndex,uvIndexCS
 
       call modelEclock%get(hour=hour)
 
@@ -659,7 +661,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
         !osipov, compute UV index clear-sky
-        call computeUvIndex(fff, uvIndex, LM)
+        call computeUvIndex(fff, uvIndexCS, LM)
           
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -2160,6 +2162,20 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
           end select
         enddo ! k
       enddo ! igroup
+
+      ! osipov, UV index diags, TODO: implemen
+      call find_groups('aijh',grpids,ngroups)
+      do igrp=1,ngroups
+        subdd => subdd_groups(grpids(igrp))
+        do k=1,subdd%ndiags
+!          select case (subdd%name(k))
+!          case ('uvindex')
+!            call inc_subdd(subdd,k,mrno2(:,:,1))
+!          case ('uvindex')
+            call inc_subdd(subdd,k,mrno(:,:,1))
+!          end select
+        enddo ! k
+      enddo ! igroup
 #endif
 
 CCCCCCCCCCCCCCCCCC END CHEMISTRY SECTION CCCCCCCCCCCCCCCCCCCCCCCCC
@@ -3077,22 +3093,22 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! osipov, UV index computation
       ! note, that conventional definition uses horizontal irradiance
       ! here I substituted it with actinic flux (which is more physical)
-      subroutine computeUvIndex(actinicFlux, uvIndex, Lmax)
+      subroutine computeUvIndex(spectralFlux, uvInd, Lmax)
       use trdiag_com, only : erythema_action_spectra  ! osipov, action spectra for UV index
       use photolysis, only : WL,nwfastj
       implicit none
       
-      real*8, intent(in) :: actinicFlux(:,:)
-      real*8, intent(out) :: uvIndex(:)
+      real*8, intent(in) :: spectralFlux(:,:)
+      real*8, intent(out) :: uvIind(:)
       integer, intent(in) :: Lmax
       integer :: L
       
       real*8, dimension(nwfastj) :: E
       real*8, dimension(nwfastj) :: slice
-      real*8, parameter :: plank_constant = 6.62606957 * 10**-34  ! J*s
-      real*8, parameter :: speed_of_light = 299792458  ! m*s^-1
+      real*8, parameter :: plankConstant = 6.62606957e-34  ! J*s
+      real*8, parameter :: speedOfLight = 299792458.  ! m*s^-1
       
-      E(:) = plank_constant * speed_of_light / (WL(:)*1e-9)  ! J
+      E(:) = plankConstant * speedOfLight / (WL(:)*1e-9)  ! J
     
       ! convert photons sec**-1 cm**-2 -> mW * m^-2
       !spectral_flux = actinicFlux(:,:) * E(:) * 10**4 * 10 ** 3
@@ -3100,10 +3116,9 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! get the erythemal spectrum
       ! since the flux is already integrated, simply weight and sum
       do L=1,Lmax
-        slice = actinicFlux(:, L)
-        uvIndex(:) = 1/25 * sum(erythema_action_spectra(1:nwfastj)*
-     &               slice(:) * E(:) *
-     &               10**4 * 10 ** 3,
+        slice = spectralFlux(:, L)
+        uvInd(:) = 1/25 * sum(erythema_action_spectra(1:nwfastj)*
+     &               slice(:) * E(:) * 1e4 * 1e3,
      &               DIM=1, mask=(WL.gt.286 .and. WL.lt.400))
       end do
       
