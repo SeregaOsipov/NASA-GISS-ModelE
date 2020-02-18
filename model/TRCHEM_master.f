@@ -665,7 +665,9 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
         !osipov, compute UV index clear-sky
-        call computeUvIndex(fff, uvIndexCS(i,j), LM)
+        ! TODO: figure out how to pass the argument
+        !call computeUvIndex(fff, uvIndexCS(i,j), LM)
+        call computeUvIndex(uvIndexCS(i,j), LM)
           
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -681,7 +683,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
         
         !osipov, compute UV index
-        call computeUvIndex(fff, uvIndex(i,j), LM)
+        ! call computeUvIndex(fff, uvIndex(i,j), LM)
+        call computeUvIndex(uvIndex(i,j), LM)
         
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -2177,6 +2180,10 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             call inc_subdd(subdd,k,uvIndex(:,:))
           case ('uvindexcs')
             call inc_subdd(subdd,k,uvIndexCS(:,:))
+          case ('uvindexmax')
+            call inc_subdd(subdd,k,uvIndex(:,:))
+          case ('uvindexcsmax')
+            call inc_subdd(subdd,k,uvIndexCS(:,:))  
           end select
         enddo ! k
       enddo ! igroup
@@ -3097,12 +3104,13 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! osipov, UV index calculations
       ! note, that conventional definition uses horizontal irradiance
       ! here I substitute it with actinic flux (which is more physical) but produces value about twice larger
-      subroutine computeUvIndex(spectralFlux, uvInd, Lmax)
+      !subroutine computeUvIndex(spectralFlux, uvInd, Lmax)
+      subroutine computeUvIndex(uvInd, Lmax)
       use trdiag_com, only : erythemaActionSpectra  ! osipov, action spectra for UV index
-      use photolysis, only : WL,nwfastj
+      use photolysis, only : WL,nwfastj,fff
       implicit none
       
-      real*8, intent(in) :: spectralFlux(:,:)
+      !real*8, intent(in) :: spectralFlux(:,:)
       real*8, intent(out) :: uvInd
       integer, intent(in) :: Lmax
       integer :: L
@@ -3120,7 +3128,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! since the flux is already integrated, simply weight and sum
       !slice = spectralFlux(:, L)
       uvInd = 1/25 * sum(erythemaActionSpectra(1:nwfastj)*
-     &               spectralFlux(:, 1) * E(:) * 1e4 * 1e3,
+     &               fff(:, 1) * E(:) * 1e4 * 1e3,
      &               mask=(WL.gt.286 .and. WL.lt.400))
       
       return
