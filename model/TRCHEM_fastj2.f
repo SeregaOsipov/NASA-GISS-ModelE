@@ -560,7 +560,7 @@ c
 
 
       subroutine set_prof(NSLON,NSLAT,surfaceAlbedo,
-      &                   clouds_feedback)  ! osipov
+     &                    clouds_feedback)  ! osipov
 !@sum set_prof to set up atmospheric profiles required by Fast-J2 using
 !@+   a doubled version of the level scheme used in the CTM. First
 !@+   pressure and z* altitude are defined, then O3 and T are taken
@@ -580,7 +580,6 @@ C**** GLOBAL parameters and variables:
       ! osipov
       use rad_com, only: spectral_tau_ext, spectral_tau_sca,
      &                   spectral_g, n_spectral_bands
-      logical, intent(in) :: clouds_feedback  ! osipov
       USE RADPAR, only : nraero_aod=>ntrace
 #ifdef TRACERS_ON
       use OldTracer_mod, only: trname
@@ -596,6 +595,7 @@ C**** Local parameters and variables and arguments:
 !@var skip_tracer logical to not define aer2 for a rad code tracer
       INTEGER, INTENT(IN) :: nslon, nslat
       real*8, intent(IN) :: surfaceAlbedo
+      logical, intent(in) :: clouds_feedback  ! osipov
       integer             :: l, k, i, ii, m, j, iclay, n, LL, wli
       real*8, dimension(nlevref+1) :: pstd
       real*8, dimension(nlevref) :: oref3, tref3

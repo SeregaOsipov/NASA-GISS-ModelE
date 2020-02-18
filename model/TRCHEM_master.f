@@ -80,7 +80,7 @@ c
      &     ,ijlt_OxlOH,ijs_NO2_1330,ijs_NO2_1330c,ijlt_NO2vmr,ijlt_NOvmr
      &     ,ijlt_JO1D,ijlt_JNO2,ijlt_JH2O2,ijlt_O3ppbv,ijlt_O3cmatm
      &     ,jls_ClOcon,jls_H2Ocon
-     &     ,ijlt_af, ijlt_af_cs, ijltv_uv_index, ijltv_uv_index_cs  ! osipov, add fast-j2 spectral actinic flux (all-sky and clear-sky)
+     &     ,ijlt_af, ijlt_af_cs, ijlt_uv_index, ijlt_uv_index_cs  ! osipov, add fast-j2 spectral actinic flux (all-sky and clear-sky)
       USE TRCHEM_Shindell_COM
 #ifdef TRACERS_AEROSOLS_SOA
       USE TRACERS_SOA, only: soa_aerosolphase,voc2nox,soa_apart,
@@ -654,31 +654,34 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         END DO
 
 ! calculate photolysis rates
-		!osipov add the fastj diags to the output
-		! osipov TODO: implement cs_flag
-		call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
-		
-		!osipov, compute UV index
-        computeUvIndex(fff, uvIndex, LM)
+        !osipov add the fastj diags to the output
+        ! osipov TODO: implement cs_flag
+        call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
+
+        !osipov, compute UV index
+        call computeUvIndex(fff, uvIndex, LM)
           
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
-          	taijls(i,j,L,ijlt_af_cs(n))=taijls(i,j,L,ijlt_af_cs(n))+fff(n, L)
+            taijls(i,j,L,ijlt_af_cs(n))=taijls(i,j,L,ijlt_af_cs(n))
+     &                                 +fff(n, L)
           end do
-          taijls(i,j,L,ijlt_uv_index_cs)=taijls(i,j,L,ijlt_af_cs)+uvIndex(L)
+          taijls(i,j,L,ijlt_uv_index_cs)=taijls(i,j,L,ijlt_uv_index_cs)
+     &                                  +uvIndex(L)
         end do
         
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
         
         !osipov, compute UV index
-        computeUvIndex(fff, uvIndex, LM)
+        call computeUvIndex(fff, uvIndex, LM)
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
-          	taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
+            taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
           end do
-          taijls(i,j,L,ijlt_uv_index)=taijls(i,j,L,ijlt_af_cs)+uvIndex(L)
+          taijls(i,j,L,ijlt_uv_index)=taijls(i,j,L,ijlt_uv_index)
+     &                               +uvIndex(L)
         end do
 
         call photo_acetone(I,J,sza*radian) ! simpler calculation for acetone
@@ -3074,18 +3077,20 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! here I substituted it with actinic flux (which is more physical)
       subroutine computeUvIndex(actinicFlux, uvIndex, Lmax)
       use trdiag_com, only : erythema_action_spectra  ! osipov, action spectra for UV index
-      use photolysis, only : WL
+      use photolysis, only : WL,nwfastj
       implicit none
       
       real*8, intent(in) :: actinicFlux(:,:)
       real*8, intent(out) :: uvIndex(:)
-      integer*8, intent(in) :: Lmax
+      integer, intent(in) :: Lmax
+      integer :: L
       
-      real*8, dimension(18) :: E
-      real*8, parameter :: plank_constant = 6.62606957 * 10**-34  # J*s
-      real*8, parameter :: speed_of_light = 299792458  # m*s^-1
+      real*8, dimension(nwfastj) :: E
+      real*8, dimension(nwfastj) :: slice
+      real*8, parameter :: plank_constant = 6.62606957 * 10**-34  ! J*s
+      real*8, parameter :: speed_of_light = 299792458  ! m*s^-1
       
-      E = plank_constant * speed_of_light / (WL*10**-9)  # J
+      E(:) = plank_constant * speed_of_light / (WL(:)*10**-9)  ! J
     
       ! convert photons sec**-1 cm**-2 -> mW * m^-2
       !spectral_flux = actinicFlux(:,:) * E(:) * 10**4 * 10 ** 3
@@ -3093,8 +3098,10 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! get the erythemal spectrum
       ! since the flux is already integrated, simply weight and sum
       do L=1,Lmax
-        uvIndex(:) = 1/25 * sum(erythema_action_spectra(:)*
-     &               actinicFlux(:, L) * E(:) * 10**4 * 10 ** 3,
+        slice = actinicFlux(:, L)
+        uvIndex(:) = 1/25 * sum(erythema_action_spectra(1:nwfastj)*
+     &               slice(:) * E(:) *
+     &               10**4 * 10 ** 3,
      &               DIM=1, mask=(WL.gt.286 .and. WL.lt.400))
       end do
       

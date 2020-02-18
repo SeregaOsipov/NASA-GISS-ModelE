@@ -4451,10 +4451,12 @@ c- 3D diagnostic per mode
         k = k + 1
          ijlt_af_cs(n)=k
          write(temp_str , '(I2)') n
-         lname_ijlt(k) = 'actinic flux clear-sky in band '//trim(temp_str)
-         sname_ijlt(k) = 'act_flux_cs_b'//trim(adjustl(temp_str))//
+         lname_ijlt(k) = 'actinic flux clear-sky in band '//
+     &                   trim(temp_str)
+         sname_ijlt(k) = 'act_flux_cs_b'//trim(adjustl(temp_str))
          ijlt_power(k) = 0
-         units_ijlt(k) = unit_string(ijlt_power(k),' photons sec**-1 cm**-2')
+         units_ijlt(k) = unit_string(ijlt_power(k),
+     &                   ' photons sec**-1 cm**-2')
          scale_ijlt(k) = 10.**(-ijlt_power(k))
       end do
       
@@ -4466,7 +4468,8 @@ c- 3D diagnostic per mode
          lname_ijlt(k) = 'actinic flux in band '//trim(temp_str)
          sname_ijlt(k) = 'act_flux_b'//trim(adjustl(temp_str))
          ijlt_power(k) = 0
-         units_ijlt(k) = unit_string(ijlt_power(k),' photons sec**-1 cm**-2')
+         units_ijlt(k) = unit_string(ijlt_power(k),
+     &                   ' photons sec**-1 cm**-2')
          scale_ijlt(k) = 10.**(-ijlt_power(k))
       end do   
 

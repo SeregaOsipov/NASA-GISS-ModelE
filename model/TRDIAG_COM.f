@@ -254,19 +254,21 @@ C**** TAIJLS 3D special tracer diagnostics
      & ,ijlt_clrsky2d=0
 ! osipov, add fast j diagnostics to the output
 !@var ijlt_af actinic flux for N spectral band
-	  integer, allocatable :: ijlt_af(:)
-	  integer, allocatable :: ijlt_af_cs(:)
-	  
+      integer, allocatable :: ijlt_af(:)
+      integer, allocatable :: ijlt_af_cs(:)
+      integer, allocatable :: ijlt_uv_index(:)
+      integer, allocatable :: ijlt_uv_index_cs(:)
+  
 ! osipov, the erythema action spectra computed on the fast-j2 wavelength grid 
 ! This spectrum is parametrized after A. F. McKinlay and B. L. Diffey (1987).
 ! for references see http://uv.biospherical.com/Version2/doserates/CIE.txt
 ! and https://www.esrl.noaa.gov/gmd/grad/neubrew/docs/UVindex.pdf
 ! osipov TODO: replace 16 with constant (NWWW)
 ! osipov, keep in mind that UV should be only integrated in the [286;400] range
-      real*8, parameter :: erythema_action_spectra(16) = (/1.d0, 1.d0, 1.d0, 1.d0,
-     &  1.d0, 1.d0, 1.d0, 1.d0, 1.d0, 1.d0, 1.d0, 1.d0,
+      real*8, parameter :: erythema_action_spectra(16) = (/1.e0, 1.e0, 1.e0, 1.e0,
+     &  1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0,
      &  3.38844156e-01, 7.44731974e-02, 2.03235701e-02, 1.23026877e-03,
-     &  2.42661010e-04, 0.d0/)
+     &  2.42661010e-04, 0.e0/)
 
 !@var ijlt_aH2O aerosol H2O from thermodynamics (ug/m3)
 !@var ijlt_apH aerosol pH from thermodynamics (dimensionless)
@@ -1552,9 +1554,14 @@ C*** Unpack read global data into local distributed arrays
 ! osipov TODO replace 18 with var
           allocate(ijlt_af(18))
           allocate(ijlt_af_cs(18))
-	  ijlt_af = 0
-	  ijlt_af_cs = 0
-	  
+          allocate(ijlt_uv_index(18))
+          allocate(ijlt_uv_index_cs(18))
+
+          ijlt_af = 0
+          ijlt_af_cs = 0
+          ijlt_uv_index = 0
+          ijlt_uv_index_cs = 0
+ 
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT
       allocate(ijlt_3Dmass(ntm))
       ijlt_3Dmass = 0
