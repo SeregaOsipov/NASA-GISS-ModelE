@@ -655,10 +655,10 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
 
 ! calculate photolysis rates
         !osipov add the fastj diags to the output
-        ! osipov TODO: implement cs_flag
+        ! osipov, first, call fast-j2 with the clouds feedback OFF
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
-        !osipov, compute UV index
+        !osipov, compute UV index clear-sky
         call computeUvIndex(fff, uvIndex, LM)
           
         ! osipov, all-sky actinic flux
@@ -671,10 +671,12 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
      &                                  +uvIndex(L)
         end do
         
+        ! osipov, call fast-j2 second time, this time with the clouds feedback ON
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
         
         !osipov, compute UV index
         call computeUvIndex(fff, uvIndex, LM)
+        
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
@@ -3090,7 +3092,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       real*8, parameter :: plank_constant = 6.62606957 * 10**-34  ! J*s
       real*8, parameter :: speed_of_light = 299792458  ! m*s^-1
       
-      E(:) = plank_constant * speed_of_light / (WL(:)*10**-9)  ! J
+      E(:) = plank_constant * speed_of_light / (WL(:)*1e-9)  ! J
     
       ! convert photons sec**-1 cm**-2 -> mW * m^-2
       !spectral_flux = actinicFlux(:,:) * E(:) * 10**4 * 10 ** 3

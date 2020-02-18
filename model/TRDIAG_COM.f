@@ -265,8 +265,8 @@ C**** TAIJLS 3D special tracer diagnostics
 ! and https://www.esrl.noaa.gov/gmd/grad/neubrew/docs/UVindex.pdf
 ! osipov TODO: replace 16 with constant (NWWW)
 ! osipov, keep in mind that UV should be only integrated in the [286;400] range
-      real*8, parameter :: erythema_action_spectra(16) = (/1.e0, 1.e0, 1.e0, 1.e0,
-     &  1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0,
+      real*8, parameter :: erythema_action_spectra(16) = (/1.e0, 1.e0,
+     &  1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0,
      &  3.38844156e-01, 7.44731974e-02, 2.03235701e-02, 1.23026877e-03,
      &  2.42661010e-04, 0.e0/)
 
