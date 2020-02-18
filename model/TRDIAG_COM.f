@@ -256,8 +256,8 @@ C**** TAIJLS 3D special tracer diagnostics
 !@var ijlt_af actinic flux for N spectral band
       integer, allocatable :: ijlt_af(:)
       integer, allocatable :: ijlt_af_cs(:)
-      integer, allocatable :: ijlt_uv_index(:)
-      integer, allocatable :: ijlt_uv_index_cs(:)
+! osipov, UV index at surface, all-sky and clear-sky
+      integer :: ijts_uv_index, ijts_uv_index_cs
   
 ! osipov, the erythema action spectra computed on the fast-j2 wavelength grid 
 ! This spectrum is parametrized after A. F. McKinlay and B. L. Diffey (1987).
@@ -265,7 +265,7 @@ C**** TAIJLS 3D special tracer diagnostics
 ! and https://www.esrl.noaa.gov/gmd/grad/neubrew/docs/UVindex.pdf
 ! osipov TODO: replace 18 with constant (NWWW)
 ! osipov, keep in mind that UV should be only integrated in the [286;400] range
-      real*8, parameter :: erythema_action_spectra(18) = (/1.e0, 1.e0,
+      real*8, parameter :: erythemaActionSpectra(18) = (/1.e0, 1.e0,
      &  1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0, 1.e0,
      &  3.38844156e-01, 7.44731974e-02, 2.03235701e-02, 1.23026877e-03,
      &  2.42661010e-04, 0.e0/)
@@ -1554,13 +1554,11 @@ C*** Unpack read global data into local distributed arrays
 ! osipov TODO replace 18 with var
           allocate(ijlt_af(18))
           allocate(ijlt_af_cs(18))
-          allocate(ijlt_uv_index(18))
-          allocate(ijlt_uv_index_cs(18))
 
           ijlt_af = 0
           ijlt_af_cs = 0
-          ijlt_uv_index = 0
-          ijlt_uv_index_cs = 0
+          ijlts_uv_index = 0
+          ijlts_uv_index_cs = 0
  
 #ifdef SAVE_AEROSOL_3DMASS_FOR_NINT
       allocate(ijlt_3Dmass(ntm))

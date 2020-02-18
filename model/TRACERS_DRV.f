@@ -3862,6 +3862,23 @@ c      end do
 c      end do
 #endif  /* TRACERS_AMP */
 
+! osipov, add UV index, clear- and all-sky
+      k = k + 1
+         ijt_uv_index=k
+         lname_ijts(k) = 'UV index (based on actinic flux)'
+         sname_ijts(k) = 'uv_index'
+         ijts_power(k) = 0
+         units_ijts(k) = unit_string(ijts_power(k),' ')
+         scale_ijts(k) = 10.**(-ijts_power(k))
+         
+      k = k + 1
+         ijt_uv_index_cs=k
+         lname_ijts(k) = 'UV index clear-sky  (based on actinic flux)'
+         sname_ijts(k) = 'uv_index_cs'
+         ijts_power(k) = 0
+         units_ijts(k) = unit_string(ijts_power(k),' ')
+         scale_ijts(k) = 10.**(-ijts_power(k))
+         
 c
 c Append some denominator fields if necessary
 c
@@ -4472,24 +4489,6 @@ c- 3D diagnostic per mode
      &                   ' photons sec**-1 cm**-2')
          scale_ijlt(k) = 10.**(-ijlt_power(k))
       end do   
-
-! osipov, add UV index, clear-sky
-      k = k + 1
-         ijlt_uv_index=k
-         lname_ijlt(k) = 'UV index (based on actinic flux)'
-         sname_ijlt(k) = 'uv_index'
-         ijlt_power(k) = 0
-         units_ijlt(k) = unit_string(ijlt_power(k),' ')
-         scale_ijlt(k) = 10.**(-ijlt_power(k))
-         
-! osipov, add UV index, all-sky
-      k = k + 1
-         ijlt_uv_index_cs=k
-         lname_ijlt(k) = 'UV index clear-sky (based on actinic flux)'
-         sname_ijlt(k) = 'uv_index_cs'
-         ijlt_power(k) = 0
-         units_ijlt(k) = unit_string(ijlt_power(k),' ')
-         scale_ijlt(k) = 10.**(-ijlt_power(k))         
 
 C**** 3D tracer-related arrays but not attached to any one tracer
 

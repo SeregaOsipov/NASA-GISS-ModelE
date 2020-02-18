@@ -80,7 +80,7 @@ c
      &     ,ijlt_OxlOH,ijs_NO2_1330,ijs_NO2_1330c,ijlt_NO2vmr,ijlt_NOvmr
      &     ,ijlt_JO1D,ijlt_JNO2,ijlt_JH2O2,ijlt_O3ppbv,ijlt_O3cmatm
      &     ,jls_ClOcon,jls_H2Ocon
-     &     ,ijlt_af, ijlt_af_cs, ijlt_uv_index, ijlt_uv_index_cs  ! osipov, add fast-j2 spectral actinic flux (all-sky and clear-sky)
+     &     ,ijlt_af, ijlt_af_cs, ijts_uv_index, ijts_uv_index_cs  ! osipov, add fast-j2 spectral actinic flux (all-sky and clear-sky)
       USE TRCHEM_Shindell_COM
 #ifdef TRACERS_AEROSOLS_SOA
       USE TRACERS_SOA, only: soa_aerosolphase,voc2nox,soa_apart,
@@ -222,7 +222,7 @@ C**** Local parameters and variables and arguments:
 ! osipov
       real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
      &                  grid%j_strt_halo:grid%j_stop_halo,
-     &                  LM) :: uvIndex,uvIndexCS
+     &                  :: uvIndex,uvIndexCS
 
       call modelEclock%get(hour=hour)
 
@@ -669,9 +669,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
             taijls(i,j,L,ijlt_af_cs(n))=taijls(i,j,L,ijlt_af_cs(n))
      &                                 +fff(n, L)
           end do
-          taijls(i,j,L,ijlt_uv_index_cs)=taijls(i,j,L,ijlt_uv_index_cs)
-     &                                  +uvIndex(L)
         end do
+        taijs(i,j,ijts_uv_index_cs)=taijs(i,j,ijts_uv_index_cs)+uvIndex
         
         ! osipov, call fast-j2 second time, this time with the clouds feedback ON
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
@@ -683,10 +682,9 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
             taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
-          end do
-          taijls(i,j,L,ijlt_uv_index)=taijls(i,j,L,ijlt_uv_index)
-     &                               +uvIndex(L)
+          end do          
         end do
+        taijs(i,j,ijts_uv_index)=taijs(i,j,ijts_uv_index)+uvIndex
 
         call photo_acetone(I,J,sza*radian) ! simpler calculation for acetone
         
@@ -2163,17 +2161,18 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         enddo ! k
       enddo ! igroup
 
-      ! osipov, UV index diags, TODO: implemen
+      ! osipov, UV index diags
+      ! TODO: implement local solar noon
       call find_groups('aijh',grpids,ngroups)
       do igrp=1,ngroups
         subdd => subdd_groups(grpids(igrp))
         do k=1,subdd%ndiags
-!          select case (subdd%name(k))
-!          case ('uvindex')
-!            call inc_subdd(subdd,k,mrno2(:,:,1))
-!          case ('uvindex')
-            call inc_subdd(subdd,k,mrno(:,:,1))
-!          end select
+          select case (subdd%name(k))
+          case ('uvindex')
+            call inc_subdd(subdd,k,uvIndex(:,:))
+          case ('uvindexcs')
+            call inc_subdd(subdd,k,uvIndexCS(:,:))
+          end select
         enddo ! k
       enddo ! igroup
 #endif
@@ -3090,11 +3089,11 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       RETURN
       END SUBROUTINE Crates
       
-      ! osipov, UV index computation
+      ! osipov, UV index calculations
       ! note, that conventional definition uses horizontal irradiance
-      ! here I substituted it with actinic flux (which is more physical)
+      ! here I substitute it with actinic flux (which is more physical) but produces value about twice larger
       subroutine computeUvIndex(spectralFlux, uvInd, Lmax)
-      use trdiag_com, only : erythema_action_spectra  ! osipov, action spectra for UV index
+      use trdiag_com, only : erythemaActionSpectra  ! osipov, action spectra for UV index
       use photolysis, only : WL,nwfastj
       implicit none
       
@@ -3117,7 +3116,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! since the flux is already integrated, simply weight and sum
       do L=1,Lmax
         slice = spectralFlux(:, L)
-        uvInd(:) = 1/25 * sum(erythema_action_spectra(1:nwfastj)*
+        uvInd(:) = 1/25 * sum(erythemaActionSpectra(1:nwfastj)*
      &               slice(:) * E(:) * 1e4 * 1e3,
      &               DIM=1, mask=(WL.gt.286 .and. WL.lt.400))
       end do
