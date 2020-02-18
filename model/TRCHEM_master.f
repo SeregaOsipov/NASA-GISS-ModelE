@@ -251,6 +251,10 @@ C**** Local parameters and variables and arguments:
       if(ih1030e > IM) ih1030e = ih1030e-IM
       if(ih1330e > IM) ih1330e = ih1330e-IM
 
+! osipov initialize
+      uvIndex(I_0:I_1,J_0:J_1)=0.d0
+      uvIndexCS(I_0:I_1,J_0:J_1)=0.d0
+
 ! meanwhile, initialize the instantaneous SUBDD of NO2 column:
 ! I think it will be overwritten for all i,j, so this can be
 ! a temporary check:
@@ -661,7 +665,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
         !osipov, compute UV index clear-sky
-        call computeUvIndex(fff, uvIndexCS, LM)
+        call computeUvIndex(fff, uvIndexCS(i,j), LM)
           
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -677,7 +681,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
         
         !osipov, compute UV index
-        call computeUvIndex(fff, uvIndex, LM)
+        call computeUvIndex(fff, uvIndex(i,j), LM)
         
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -3099,12 +3103,12 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       implicit none
       
       real*8, intent(in) :: spectralFlux(:,:)
-      real*8, intent(out) :: uvInd(:)
+      real*8, intent(out) :: uvInd
       integer, intent(in) :: Lmax
       integer :: L
       
       real*8, dimension(nwfastj) :: E
-      real*8, dimension(nwfastj) :: slice
+      !real*8, dimension(nwfastj) :: slice
       real*8, parameter :: plankConstant = 6.62606957e-34  ! J*s
       real*8, parameter :: speedOfLight = 299792458.  ! m*s^-1
       
@@ -3113,14 +3117,11 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       ! convert photons sec**-1 cm**-2 -> mW * m^-2
       !spectral_flux = actinicFlux(:,:) * E(:) * 10**4 * 10 ** 3
 
-      ! get the erythemal spectrum
       ! since the flux is already integrated, simply weight and sum
-      do L=1,Lmax
-        slice = spectralFlux(:, L)
-        uvInd(:) = 1/25 * sum(erythemaActionSpectra(1:nwfastj)*
-     &               slice(:) * E(:) * 1e4 * 1e3,
-     &               DIM=1, mask=(WL.gt.286 .and. WL.lt.400))
-      end do
+      !slice = spectralFlux(:, L)
+      uvInd = 1/25 * sum(erythemaActionSpectra(1:nwfastj)*
+     &               spectralFlux(:, 1) * E(:) * 1e4 * 1e3,
+     &               mask=(WL.gt.286 .and. WL.lt.400))
       
       return
       end subroutine computeUvIndex
