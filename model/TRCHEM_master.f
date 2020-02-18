@@ -3116,7 +3116,6 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       integer :: L
       
       real*8, dimension(nwfastj) :: E
-      !real*8, dimension(nwfastj) :: slice
       real*8, parameter :: plankConstant = 6.62606957e-34  ! J*s
       real*8, parameter :: speedOfLight = 299792458.  ! m*s^-1
       
@@ -3126,8 +3125,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       !spectral_flux = actinicFlux(:,:) * E(:) * 10**4 * 10 ** 3
 
       ! since the flux is already integrated, simply weight and sum
-      !slice = spectralFlux(:, L)
-      uvInd = 1/25 * sum(erythemaActionSpectra(1:nwfastj)*
+      uvInd = 1.d0/25.d0 * sum(erythemaActionSpectra(1:nwfastj)*
      &               fff(:, 1) * E(:) * 1e4 * 1e3,
      &               mask=(WL.gt.286 .and. WL.lt.400))
       
