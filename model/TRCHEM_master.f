@@ -665,7 +665,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
         !osipov, compute UV index clear-sky
-        ! TODO: figure out how to pass the argument
+        ! TODO: passing fff as an argument requires interface or the shape information
         !call computeUvIndex(fff, uvIndexCS(i,j), LM)
         call computeUvIndex(uvIndexCS(i,j), LM)
           

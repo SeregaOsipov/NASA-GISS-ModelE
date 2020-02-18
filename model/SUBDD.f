@@ -2225,7 +2225,7 @@ c
 c
       arr(next()) = info_type_(
      &  sname = 'uvindex',
-     &  lname = 'UV index at solar noon',
+     &  lname = 'UV index',
      &  units = ''
      &     )
 c
@@ -2239,7 +2239,7 @@ c
 c
       arr(next()) = info_type_(
      &  sname = 'uvindexcs',
-     &  lname = 'UV index clear-sky at solar noon',
+     &  lname = 'UV index clear-sky',
      &  units = ''
      &     )
       return
