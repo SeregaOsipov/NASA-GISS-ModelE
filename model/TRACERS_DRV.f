@@ -3777,6 +3777,24 @@ c SW forcing from albedo change
         scale_ijts(k) = 10.**(-ijts_power(k))
         ijts_HasArea(k) = .false.
 #endif  /* TRACERS_SPECIAL_Shindell */
+
+! osipov, add UV index, clear- and all-sky
+      k = k + 1
+         ijts_uv_index=k
+         lname_ijts(k) = 'UV index (based on actinic flux)'
+         sname_ijts(k) = 'uv_index'
+         ijts_power(k) = 0
+         units_ijts(k) = unit_string(ijts_power(k),' ')
+         scale_ijts(k) = 10.**(-ijts_power(k))
+         
+      k = k + 1
+         ijts_uv_index_cs=k
+         lname_ijts(k) = 'UV index clear-sky  (based on actinic flux)'
+         sname_ijts(k) = 'uv_index_cs'
+         ijts_power(k) = 0
+         units_ijts(k) = unit_string(ijts_power(k),' ')
+         scale_ijts(k) = 10.**(-ijts_power(k))
+         
 #if (defined TRACERS_DUST) || (defined TRACERS_MINERALS)
       k = k + 1
       ijts_spec(nDustEv1ij)=k
@@ -3861,24 +3879,6 @@ c         scale_ijts(k) = 10.**(-ijts_power(k))
 c      end do
 c      end do
 #endif  /* TRACERS_AMP */
-
-! osipov, add UV index, clear- and all-sky
-      k = k + 1
-         ijts_uv_index=k
-         lname_ijts(k) = 'UV index (based on actinic flux)'
-         sname_ijts(k) = 'uv_index'
-         ijts_power(k) = 0
-         units_ijts(k) = unit_string(ijts_power(k),' ')
-         scale_ijts(k) = 10.**(-ijts_power(k))
-         
-      k = k + 1
-         ijts_uv_index_cs=k
-         lname_ijts(k) = 'UV index clear-sky  (based on actinic flux)'
-         sname_ijts(k) = 'uv_index_cs'
-         ijts_power(k) = 0
-         units_ijts(k) = unit_string(ijts_power(k),' ')
-         scale_ijts(k) = 10.**(-ijts_power(k))
-         
 c
 c Append some denominator fields if necessary
 c

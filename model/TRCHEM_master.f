@@ -670,7 +670,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
      &                                 +fff(n, L)
           end do
         end do
-        taijs(i,j,ijts_uv_index_cs)=taijs(i,j,ijts_uv_index_cs)+uvIndex
+        taijs(i,j,ijts_uv_index_cs)=taijs(i,j,ijts_uv_index_cs)
+     &                             +uvIndex(i,j)
         
         ! osipov, call fast-j2 second time, this time with the clouds feedback ON
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
@@ -684,7 +685,7 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
             taijls(i,j,L,ijlt_af(n))=taijls(i,j,L,ijlt_af(n))+fff(n, L)
           end do          
         end do
-        taijs(i,j,ijts_uv_index)=taijs(i,j,ijts_uv_index)+uvIndex
+        taijs(i,j,ijts_uv_index)=taijs(i,j,ijts_uv_index)+uvIndex(i,j)
 
         call photo_acetone(I,J,sza*radian) ! simpler calculation for acetone
         
