@@ -666,13 +666,14 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         ! osipov, first, call fast-j2 with the clouds feedback OFF
         call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
 
-        !osipov, compute UV index clear-sky
+        !osipov, compute UV index, clear-sky
         ! TODO: passing fff as an argument requires interface or the shape information
+        ! TODO: best is to move subroutine inside the module
         !call computeUvIndex(fff, uvIndexCS(i,j), LM)
         call computeUvIndex(uvIndexItem, LM)
         uvIndexCS(i,j) = uvIndexItem
           
-        ! osipov, all-sky actinic flux
+        ! osipov, clear-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
             taijls(i,j,L,ijlt_af_cs(n))=taijls(i,j,L,ijlt_af_cs(n))
@@ -680,13 +681,12 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
           end do
         end do
         taijs(i,j,ijts_uv_index_cs)=taijs(i,j,ijts_uv_index_cs)
-     &                             +uvIndex(i,j)
+     &                             +uvIndexCS(i,j)
         
         ! osipov, call fast-j2 second time, this time with the clouds feedback ON
         call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
         
-        !osipov, compute UV index
-        ! call computeUvIndex(fff, uvIndex(i,j), LM)
+        !osipov, compute UV index, all-sky
         call computeUvIndex(uvIndexItem, LM)
         uvIndex(i,j) = uvIndexItem
         
