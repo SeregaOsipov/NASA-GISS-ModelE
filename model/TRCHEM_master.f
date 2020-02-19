@@ -223,6 +223,8 @@ C**** Local parameters and variables and arguments:
       real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
      &                  grid%j_strt_halo:grid%j_stop_halo)
      &                  :: uvIndex,uvIndexCS
+! osipov, TODO: bug fix
+      real*8 :: uvIndexItem = 0.d0
 
       call modelEclock%get(hour=hour)
 
@@ -667,7 +669,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         !osipov, compute UV index clear-sky
         ! TODO: passing fff as an argument requires interface or the shape information
         !call computeUvIndex(fff, uvIndexCS(i,j), LM)
-        call computeUvIndex(uvIndexCS(i,j), LM)
+        call computeUvIndex(uvIndexItem, LM)
+        uvIndexCS(i,j) = uvIndexItem
           
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -684,7 +687,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         
         !osipov, compute UV index
         ! call computeUvIndex(fff, uvIndex(i,j), LM)
-        call computeUvIndex(uvIndex(i,j), LM)
+        call computeUvIndex(uvIndexItem, LM)
+        uvIndex(i,j) = uvIndexItem
         
         ! osipov, all-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
@@ -3111,7 +3115,7 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
       implicit none
       
       !real*8, intent(in) :: spectralFlux(:,:)
-      real*8, intent(out) :: uvInd
+      real*8, intent(inout) :: uvInd
       integer, intent(in) :: Lmax
       integer :: L
       
