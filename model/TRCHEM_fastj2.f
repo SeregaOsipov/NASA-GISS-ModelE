@@ -727,28 +727,30 @@ c  Assume limiting temperature for ice of -40 deg C :
 	      enddo
       end if
 
-      ! osipov, TODO: get proper spectral dependence for clouds      
-      do wli=1,n_spectral_bands
-        do LL=1,NLGCM
-          if(TFASTJ(LL) > 233.d0) then
-            ! osipov, OD is currently spectrally gray (seems like a good assumption according to fastj table species 7 and 11)
-            ! osipov, asssume SSA=1 for clouds
-            fastj_spectral_tau_ext(LL,wli,njaero-1) = odcol(LL)
-            fastj_spectral_tau_ext(LL,wli,njaero) = 0
-            fastj_spectral_tau_sca(LL,wli,njaero-1) = odcol(LL)
-            fastj_spectral_tau_sca(LL,wli,njaero) = 0
-          else
-            fastj_spectral_tau_ext(LL,wli,njaero-1) = 0
-            fastj_spectral_tau_ext(LL,wli,njaero) = odcol(LL)
-            fastj_spectral_tau_sca(LL,wli,njaero-1) = 0
-            fastj_spectral_tau_sca(LL,wli,njaero) = odcol(LL)
-          endif        
-        enddo
+      ! osipov, TODO: get proper spectral dependence for clouds
+      if (clouds_feedback) then  ! osipov, only include clouds if the feedback is ON      
+        do wli=1,n_spectral_bands
+          do LL=1,NLGCM
+            if(TFASTJ(LL) > 233.d0) then
+              ! osipov, OD is currently spectrally gray (seems like a good assumption according to fastj table species 7 and 11)
+              ! osipov, asssume SSA=1 for clouds
+              fastj_spectral_tau_ext(LL,wli,njaero-1) = odcol(LL)
+              fastj_spectral_tau_ext(LL,wli,njaero) = 0
+              fastj_spectral_tau_sca(LL,wli,njaero-1) = odcol(LL)
+              fastj_spectral_tau_sca(LL,wli,njaero) = 0
+            else
+              fastj_spectral_tau_ext(LL,wli,njaero-1) = 0
+              fastj_spectral_tau_ext(LL,wli,njaero) = odcol(LL)
+              fastj_spectral_tau_sca(LL,wli,njaero-1) = 0
+              fastj_spectral_tau_sca(LL,wli,njaero) = odcol(LL)
+            endif        
+          enddo
 
-        ! osipov, TODO: get proper phase function calculations, for now it is spectrally gray
-        fastj_spectral_g(:,wli,njaero-1) = 0.87 ! data copied from jv_spec, w_n=(2n+1)*g**n
-        fastj_spectral_g(:,wli,njaero) = 0.75233
-      enddo
+          ! osipov, TODO: get proper phase function calculations, for now it is spectrally gray
+          fastj_spectral_g(:,wli,njaero-1) = 0.87 ! data copied from jv_spec, w_n=(2n+1)*g**n
+          fastj_spectral_g(:,wli,njaero) = 0.75233
+        enddo
+      endif
 
 c Top of the part of atmosphere passed to Fast-J2:
       AER2(NLGCM+1,:) = 0.d0
