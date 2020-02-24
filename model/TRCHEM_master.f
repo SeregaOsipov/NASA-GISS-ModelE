@@ -222,7 +222,8 @@ C**** Local parameters and variables and arguments:
 ! osipov
       real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
      &                  grid%j_strt_halo:grid%j_stop_halo)
-     &                  :: uvIndex,uvIndexCS
+     &                  :: uvIndex,uvIndexCS,uvindexCSnA,
+     &                     uvindexCSnAnSO2
 ! osipov, TODO: bug fix
       real*8 :: uvIndexItem = 0.d0
 
@@ -256,6 +257,8 @@ C**** Local parameters and variables and arguments:
 ! osipov initialize
       uvIndex(I_0:I_1,J_0:J_1)=0.d0
       uvIndexCS(I_0:I_1,J_0:J_1)=0.d0
+      uvindexCSnA(I_0:I_1,J_0:J_1)=0.d0
+      uvindexCSnAnSO2(I_0:I_1,J_0:J_1)=0.d0
 
 ! meanwhile, initialize the instantaneous SUBDD of NO2 column:
 ! I think it will be overwritten for all i,j, so this can be
@@ -663,16 +666,26 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
 
 ! calculate photolysis rates
         !osipov add the fastj diags to the output
-        ! osipov, first, call fast-j2 with the clouds feedback OFF
-        call fastj2_drv(I, J, ta, rh, albedoToUse, .false.)
-
-        !osipov, compute UV index, clear-sky
-        ! TODO: passing fff as an argument requires interface or the shape information
-        ! TODO: best is to move subroutine inside the module
-        !call computeUvIndex(fff, uvIndexCS(i,j), LM)
+        
+        ! osipov, call fast-j2 with the clouds feedback OFF, aerosols OFF, SO2 OFF
+        ! osipov, also tell it to skip j calculations, only compute actinic flux
+        call fastj2_drv(I, J, ta, rh, albedoToUse,
+                    .false., .false., .false., .false.)
         call computeUvIndex(uvIndexItem, LM)
-        uvIndexCS(i,j) = uvIndexItem
-          
+        uvindexCSnAnSO2(i,j) = uvIndexItem
+        
+        ! osipov, clouds feedback OFF, aerosols OFF, SO2 ON
+        call fastj2_drv(I, J, ta, rh, albedoToUse,
+                    .false., .false., .true., .false.)
+        call computeUvIndex(uvIndexItem, LM)
+        uvindexCSnA(i,j) = uvIndexItem
+        
+        ! osipov, clouds feedback OFF, aerosols ON, SO2 ON
+        call fastj2_drv(I, J, ta, rh, albedoToUse,
+                    .false., .true., .true., .false.)
+        call computeUvIndex(uvIndexItem, LM)
+        uvindexCS(i,j) = uvIndexItem
+        
         ! osipov, clear-sky actinic flux
         DO L=min(JPNL,topLevelOfChemistry),1,-1
           do n=1,NWWW
@@ -683,8 +696,12 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         taijs(i,j,ijts_uv_index_cs)=taijs(i,j,ijts_uv_index_cs)
      &                             +uvIndexCS(i,j)
         
-        ! osipov, call fast-j2 second time, this time with the clouds feedback ON
-        call fastj2_drv(I, J, ta, rh, albedoToUse, .true.)
+        ! osipov, call fast-j2 ALL feedbacks ON and tell it to compute Js as well
+        call fastj2_drv(I, J, ta, rh, albedoToUse, .true.,.true., .true., true)
+        
+        ! TODO: passing fff as an argument requires interface or the shape information
+        ! TODO: best is to move subroutine inside the module
+        !call computeUvIndex(fff, uvIndexCS(i,j), LM)
         
         !osipov, compute UV index, all-sky
         call computeUvIndex(uvIndexItem, LM)
@@ -2187,7 +2204,11 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
           case ('uvindexmax')
             call inc_subdd(subdd,k,uvIndex(:,:))
           case ('uvindexcsmax')
-            call inc_subdd(subdd,k,uvIndexCS(:,:))  
+            call inc_subdd(subdd,k,uvIndexCS(:,:))
+          case ('uvindexcsnamax')
+            call inc_subdd(subdd,k,uvIndexCSnA(:,:))
+            case ('uvindexcsnanso2max')
+          call inc_subdd(subdd,k,uvIndexCSnAnSO2(:,:))  
           end select
         enddo ! k
       enddo ! igroup

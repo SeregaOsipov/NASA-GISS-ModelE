@@ -288,7 +288,8 @@
 
 
       subroutine fastj2_drv(I, J, ta, rh, surfaceAlbedo,
-     &                      clouds_feedback)  ! osipov, add flag
+     &   cloudsFeedback, aerosolsFeedback, so2Feedback,
+     &   calculateJ)  ! osipov, add feedback flags
 !@sum fastj2_drv driver for photolysis. This subroutine needs to be
 !@+   standalone, any chemical mechanism-related code should be present in
 !@+   the chemical mechanism files itself, not here.
@@ -307,7 +308,8 @@
       real*8, intent(in) :: rh(:)
       real*8, intent(in) :: surfaceAlbedo
       integer, intent(in) :: i, j ! current box horizontal indices
-      logical, intent(in) :: clouds_feedback  ! osipov, clouds feedback on fast-j2 
+      logical, intent(in) :: cloudsFeedback,aerosolsFeedback,
+     &                       so2Feedback,calculateJ  ! osipov, feedbacks for fast-j2 
 
       character(len=300) :: out_line
       integer :: LL,ii,irh,n
@@ -444,7 +446,8 @@ c       define pressures to be sent to FASTJ (edges):
         PFASTJ2(NLGCM+3)=PFASTJ2(NLGCM+2)*0.4828 ! 0.00028d0/0.00058d0 ! fudge
 
         ! osipov, add feedback flags
-        call photoj(I,J,surfaceAlbedo,clouds_feedback) ! CALL THE PHOTOLYSIS SCHEME
+        call photoj(I,J,surfaceAlbedo,cloudsFeedback,aerosolsFeedback,
+     &              so2Feedback,calculateJ) ! CALL THE PHOTOLYSIS SCHEME
       end subroutine fastj2_drv
 
 
@@ -506,7 +509,8 @@ c Assign ks and kss gas numbers of photolysis reactants from list:
 
 
       subroutine photoj(nslon,nslat,surfaceAlbedo,
-     &                  clouds_feedback)  ! osipov
+     &                  cloudsFeedback,aerosolsFeedback,
+     &                  so2Feedback,calculateJ)  ! osipov
 !@sum from jv_trop.f: FAST J-Value code, troposphere only (mjprather
 !@+ 6/96). Uses special wavelength quadrature spectral data
 !@+ (jv_spec.dat) that includes only 289 nm - 800 nm (later a single
@@ -532,7 +536,8 @@ C**** Local parameters and variables and arguments:
 !@var i,j,k dummy loop variables
       real*8, intent(IN) :: surfaceAlbedo
       INTEGER, INTENT(IN) :: nslon, nslat
-      logical, intent(in) :: clouds_feedback  ! osipov
+      logical, intent(in) :: cloudsFeedback,aerosolsFeedback,
+     &                       so2Feedback,calculateJ  ! osipov
       INTEGER             :: i,j,k
       logical             :: jay
       INTEGER             :: J_0, J_1 
@@ -547,11 +552,14 @@ C**** Local parameters and variables and arguments:
 
       if(SZA <= szamax)then 
         ! osipov, add feedback flag
-        CALL SET_PROF(NSLON,NSLAT,surfaceAlbedo,clouds_feedback)  ! Set up profiles on model levels
+        CALL SET_PROF(NSLON,NSLAT,surfaceAlbedo,cloudsFeedback,
+     &                aerosolsFeedback,so2Feedback)  ! Set up profiles on model levels
         IF(j_prnrts .and. NSLON == j_iprn .and. NSLAT == j_jprn)
      &  CALL PRTATM(2,NSLON,NSLAT,jay) ! Print out atmosphere
         CALL JVALUE(nslon,nslat)    ! Calculate actinic flux
-        CALL JRATET(1.d0,NSLAT,NSLON)! Calculate photolysis rates   
+        if (calculateJ) then
+          CALL JRATET(1.d0,NSLAT,NSLON)! Calculate photolysis rates
+        end if
       end if
 c
       return
@@ -560,7 +568,8 @@ c
 
 
       subroutine set_prof(NSLON,NSLAT,surfaceAlbedo,
-     &                    clouds_feedback)  ! osipov
+     &                    cloudsFeedback,aerosolsFeedback,
+     &                    so2Feedback)  ! osipov
 !@sum set_prof to set up atmospheric profiles required by Fast-J2 using
 !@+   a doubled version of the level scheme used in the CTM. First
 !@+   pressure and z* altitude are defined, then O3 and T are taken
@@ -595,7 +604,8 @@ C**** Local parameters and variables and arguments:
 !@var skip_tracer logical to not define aer2 for a rad code tracer
       INTEGER, INTENT(IN) :: nslon, nslat
       real*8, intent(IN) :: surfaceAlbedo
-      logical, intent(in) :: clouds_feedback  ! osipov
+      logical, intent(in) :: cloudsFeedback,aerosolsFeedback,
+      &                      so2Feedback  ! osipov
       integer             :: l, k, i, ii, m, j, iclay, n, LL, wli
       real*8, dimension(nlevref+1) :: pstd
       real*8, dimension(nlevref) :: oref3, tref3
@@ -701,7 +711,7 @@ c Now do the rest of the aerosols
 
 !osipov aerosolf feedback on photolysis
 #ifdef TRACERS_AMP
-      if (aerosols_affect_photolysis == 1) then
+      if (aerosols_affect_photolysis == 1 .and. aerosolsFeedback) then
         ! osipov this is only the aerosols, have to add clouds later
         fastj_spectral_tau_ext(1:NLGCM,:,1:nraero_aod) =
      &    spectral_tau_ext(NSLON,NSLAT,1:NLGCM,:,:)
@@ -715,7 +725,7 @@ c Now do the rest of the aerosols
 
 c  LAST two are clouds (liquid or ice)
 c  Assume limiting temperature for ice of -40 deg C :
-      if (clouds_feedback) then  ! osipov, only include clouds if the feedback is ON
+      if (cloudsFeedback) then  ! osipov, only include clouds if the feedback is ON
 	      do LL=1,NLGCM
 	        if(TFASTJ(LL) > 233.d0) then
 	          AER2(LL,njaero-1) = odcol(LL)
@@ -728,7 +738,7 @@ c  Assume limiting temperature for ice of -40 deg C :
       end if
 
       ! osipov, TODO: get proper spectral dependence for clouds
-      if (clouds_feedback) then  ! osipov, only include clouds if the feedback is ON      
+      if (cloudsFeedback) then  ! osipov, only include clouds if the feedback is ON      
         do wli=1,n_spectral_bands
           do LL=1,NLGCM
             if(TFASTJ(LL) > 233.d0) then
