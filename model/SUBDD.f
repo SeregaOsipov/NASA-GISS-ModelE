@@ -2242,6 +2242,24 @@ c
      &  lname = 'UV index clear-sky',
      &  units = ''
      &     )
+
+! osipov, same diags but clear-sky & no aerosols
+      arr(next()) = info_type_(
+     &  sname = 'uvindexcsnamax',
+     &  lname = 'UV index clear-sky, no aerosols, daily max',
+     &  units = '',
+     &  reduc = reduc_max
+     &     )      
+
+! osipov, same diags but clear-sky & no aerosols & no SO2
+      arr(next()) = info_type_(
+     &  sname = 'uvindexcsnanso2max',
+     &  lname = 'UV index clear-sky, no aerosols, daily max',
+     &  units = '',
+     &  reduc = reduc_max
+     &     )      
+                  
+      
       return
       contains
       integer function next()
