@@ -1602,7 +1602,7 @@ C---Reinitialize arrays: ! loop 1,NCFASTJ2+1
         gasesabsod = gasesabsod + XLO3+XLO2+XLSO2
       enddo
       
-      if (gasesabsod > 200) then
+      if (gasesabsod > 150) then
         do_scattering = .false.
       endif
 
