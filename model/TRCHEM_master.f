@@ -670,19 +670,19 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
         ! osipov, call fast-j2 with the clouds feedback OFF, aerosols OFF, SO2 OFF
         ! osipov, also tell it to skip j calculations, only compute actinic flux
         call fastj2_drv(I, J, ta, rh, albedoToUse,
-                    .false., .false., .false., .false.)
+     &                  .false., .false., .false., .false.)
         call computeUvIndex(uvIndexItem, LM)
         uvindexCSnAnSO2(i,j) = uvIndexItem
         
         ! osipov, clouds feedback OFF, aerosols OFF, SO2 ON
         call fastj2_drv(I, J, ta, rh, albedoToUse,
-                    .false., .false., .true., .false.)
+     &                  .false., .false., .true., .false.)
         call computeUvIndex(uvIndexItem, LM)
         uvindexCSnA(i,j) = uvIndexItem
         
         ! osipov, clouds feedback OFF, aerosols ON, SO2 ON
         call fastj2_drv(I, J, ta, rh, albedoToUse,
-                    .false., .true., .true., .false.)
+     &                  .false., .true., .true., .false.)
         call computeUvIndex(uvIndexItem, LM)
         uvindexCS(i,j) = uvIndexItem
         
@@ -697,7 +697,8 @@ C levels fastj2 uses Nagatani climatological O3, read in by chem_init:
      &                             +uvIndexCS(i,j)
         
         ! osipov, call fast-j2 ALL feedbacks ON and tell it to compute Js as well
-        call fastj2_drv(I, J, ta, rh, albedoToUse, .true.,.true., .true., true)
+        call fastj2_drv(I, J, ta, rh, albedoToUse,
+     &                  .true.,.true., .true., .true.)
         
         ! TODO: passing fff as an argument requires interface or the shape information
         ! TODO: best is to move subroutine inside the module
