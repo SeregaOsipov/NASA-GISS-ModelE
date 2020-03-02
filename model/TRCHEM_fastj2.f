@@ -1602,7 +1602,9 @@ C---Reinitialize arrays: ! loop 1,NCFASTJ2+1
         gasesabsod = gasesabsod + XLO3+XLO2+XLSO2
       enddo
       
-      if (gasesabsod > 150) then
+      !if (gasesabsod > 150) then
+      ! osipov, extend scattering calculation further up to 197 nm
+      if (WAVEL <= 197.d0) then
         do_scattering = .false.
       endif
 
