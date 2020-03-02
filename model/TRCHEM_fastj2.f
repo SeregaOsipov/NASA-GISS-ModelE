@@ -605,7 +605,7 @@ C**** Local parameters and variables and arguments:
       INTEGER, INTENT(IN) :: nslon, nslat
       real*8, intent(IN) :: surfaceAlbedo
       logical, intent(in) :: cloudsFeedback,aerosolsFeedback,
-      &                      so2Feedback  ! osipov
+     &                      so2Feedback  ! osipov
       integer             :: l, k, i, ii, m, j, iclay, n, LL, wli
       real*8, dimension(nlevref+1) :: pstd
       real*8, dimension(nlevref) :: oref3, tref3
