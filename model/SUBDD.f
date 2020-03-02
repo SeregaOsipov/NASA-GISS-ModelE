@@ -2254,7 +2254,7 @@ c
 ! osipov, same diags but clear-sky & no aerosols & no SO2
       arr(next()) = info_type_(
      &  sname = 'uvindexcsnanso2max',
-     &  lname = 'UV index clear-sky, no aerosols, daily max',
+     &  lname = 'UV index clear-sky, no aerosols, no SO2, daily max',
      &  units = '',
      &  reduc = reduc_max
      &     )      
