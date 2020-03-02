@@ -679,8 +679,10 @@ c  temperature half a layer on either side of the point supplied:
 c Overwrite O3 with GISS chemistry O3:
       DO32(1:NLGCM)=O3_FASTJ(1:NLGCM)
       TJ2(1:NLGCM) =TFASTJ(1:NLGCM)
-      !osipov add SO2, currently it is in #/cm^3
-      DSO22(1:NLGCM)=SO2_FASTJ(1:NLGCM)
+      if (so2Feedback) then
+        !osipov add SO2, currently it is in #/cm^3
+        DSO22(1:NLGCM)=SO2_FASTJ(1:NLGCM)
+      endif
 
 c  Calculate effective altitudes using scale height at each level
       zfastj2(1) = 0.d0
