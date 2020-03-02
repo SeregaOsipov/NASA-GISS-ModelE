@@ -679,6 +679,7 @@ c  temperature half a layer on either side of the point supplied:
 c Overwrite O3 with GISS chemistry O3:
       DO32(1:NLGCM)=O3_FASTJ(1:NLGCM)
       TJ2(1:NLGCM) =TFASTJ(1:NLGCM)
+      DSO22(1:NLGCM) = 0.d0
       if (so2Feedback) then
         !osipov add SO2, currently it is in #/cm^3
         DSO22(1:NLGCM)=SO2_FASTJ(1:NLGCM)

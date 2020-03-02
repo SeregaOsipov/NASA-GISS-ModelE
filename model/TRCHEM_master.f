@@ -117,7 +117,8 @@ c
       type(subdd_type), pointer :: subdd
       real*8, dimension(grid%i_strt_halo:grid%i_stop_halo,
      &                  grid%j_strt_halo:grid%j_stop_halo,
-     &                  LM) :: mrno,mrno2,mro3,OH_conc,HO2_conc
+     &                  LM) :: mrno,mrno2,mro3,OH_conc,HO2_conc,
+     &   aerExtTau303  ! osipov, add UV optical depth at 303 nm                 
 #endif
 C**** Local parameters and variables and arguments:
 !@param by35 1/35 used for spherical geometry constant
@@ -2155,6 +2156,8 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             call inc_subdd(subdd,k,OH_conc)
           case ('HO2_conc')
             call inc_subdd(subdd,k,HO2_conc)
+          case ('aerExtTau303')
+            call inc_subdd(subdd,k,aerExtTau303)            
           end select
         enddo ! k
       enddo ! igroup
@@ -2192,7 +2195,6 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       enddo ! igroup
 
       ! osipov, UV index diags
-      ! TODO: implement local solar noon
       call find_groups('aijh',grpids,ngroups)
       do igrp=1,ngroups
         subdd => subdd_groups(grpids(igrp))

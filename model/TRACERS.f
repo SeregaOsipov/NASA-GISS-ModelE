@@ -2658,6 +2658,14 @@ C
      &  )
 #endif /* TRACERS_SPECIAL_Shindell */
 
+! osipov, uv aod diags
+
+      arr(next()) = info_type_(
+     &  sname = 'aerExtTau303',
+     &  lname = 'aerosols extinction OD @ 303 nm',
+     &  units = 'dimensionless'
+     &  )
+
       return
       contains
       integer function next()
