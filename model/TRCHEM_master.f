@@ -2949,7 +2949,9 @@ c coefficients(in km**-1) are from SAGE II data on GISS web site:
         pfactor=axyp(I,J)*MA(L,I,J)/y(nM,L)
         bypfactor=1.d0/pfactor
 
-        if(pres(L) >= 245.d0 .or. pres(L) <= 5.d0)then 
+! osipov turn on / couple the hetchem to the online sulfates 
+! osipov note that size distribution is still decoupled/fixed
+!        if(pres(L) >= 245.d0 .or. pres(L) <= 5.d0)then 
           do jj=n_bi+n_nst+n_tri+1,n_bi+n_nst+n_tri+n_het
             if (jj == rrhet%N2O5_H2O__HNO3_HNO3) cycle
             rr(jj,L)=1.0d-35
@@ -3005,55 +3007,11 @@ c         in troposphere loss is rxn on sulfate, in strat rxn w PSC or sulfate
      &                   -1.d0*prod_sulf*vol2mass(n_N2O5))
           rr(rrhet%N2O5_H2O__HNO3_HNO3,L)=wprod_sulf/(dt2*y(nn_N2O5,L))
 
-        else  
-
-          if((pres(l) < 245.d0.and.pres(l) > 150.d0) .or. 
-     &    LAXb < 1.or.LAXb > topLevelOfChemistry .or.
-     &    LAXt < 1.or.LAXt > topLevelOfChemistry)then 
-            rkext(L)=0.d0
-          else
-            if(pres(l) <= 150..and.pres(l) > 31.60)then
-              if(l < LAXb) then
-                rkext(l)=rad_to_chem(2,LAXb,i,j)
-              else if(l > LAXt) then
-                rkext(l)=0.33d0*rkext(l-1)
-              else
-                rkext(l)=rad_to_chem(2,l,i,j)
-              end if
-            end if
-            if(pres(l) <= 31.6d0.and.pres(l) >= 17.8d0)then
-              if(l < LAXb) then
-                call stop_model('kext problem 1',255)
-              else if(l > LAXt) then
-                rkext(l)=0.33d0*rkext(l-1)
-              else
-                rkext(l)=rad_to_chem(2,l,i,j)
-              end if
-            end if
-            if(pres(l) <= 17.8d0.and.pres(l) >= 10.0d0)then
-              if(l < LAXb) then
-                call stop_model('kext problem 2',255)
-              else if(l > LAXt) then
-                rkext(l)=0.33d0*rkext(l-1)
-              else
-                rkext(l)=rad_to_chem(2,l,i,j)
-              end if
-            end if
-            if(pres(l) <= 10.0d0.and.pres(l) >= 4.6d0)then
-              if(l < LAXb) then
-                call stop_model('kext problem 3',255)
-              else if(l > LAXt) then
-                rkext(l)=0.33d0*rkext(l-1)
-              else
-                rkext(l)=rad_to_chem(2,l,i,j)
-              end if
-            end if
-          end if
+! osipov, get rid out the remaining else block, but keep the PSCs stuff
+!        else  
 
           ! here for certain pressures in the tropics we used to scale rkext
            
-          if(rkext(l) /= 0.)aero(l) = 1
-
           ! NAT PSC surface conc per unit volume (cm^2/cm^3)
           if(pscX(l))then
             pscEx(l)=2.d-6
@@ -3063,16 +3021,12 @@ c         in troposphere loss is rxn on sulfate, in strat rxn w PSC or sulfate
 
 c         Reaction rrhet%N2O5_H2O__HNO3_HNO3 on sulfate and PSCs:
           temp=sqrt(8.d0*1.38d-16*ta(l)*6.02d23/(PI*108.d0))
-          rr(rrhet%N2O5_H2O__HNO3_HNO3,L)=
-     &      0.5d0*rkext(l)*1.d-5*temp*0.2d0
           if(pres(l) > 31.6d0) rr(rrhet%N2O5_H2O__HNO3_HNO3,L)=
      &      rr(rrhet%N2O5_H2O__HNO3_HNO3,L)
      &      +0.25d0*pscEx(l)*temp*4.d-4
 
 c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
           temp=sqrt(8.d0*1.38d-16*ta(l)*6.02d23/(PI*97.d0))
-          rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)=
-     &      0.5d0*rkext(l)*1.d-5*temp*0.8d-2
           if(pres(l) > 31.6d0) rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)=
      &      rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)
      &      +0.25d0*pscEx(l)*temp*4.d-3
@@ -3089,14 +3043,15 @@ c         Reaction rrhet%ClONO2_H2O__HOCl_HNO3 on sulfate and PSCs:
      &        0.25d0*pscEx(l)*rr(rrhet%N2O5_HCl__Cl_HNO3,L)*0.003d0
           end if
 
-        end if  
+!        end if  ! osipov, end of the else block  
 
-        if(pres(L) < 245.d0 .and. pres(L) > 5.d0)then
-          wprod_sulf=dt2*y(nn_N2O5,L)*rr(rrhet%N2O5_H2O__HNO3_HNO3,L)
-          prod_sulf=wprod_sulf*pfactor
-          CALL INC_TAJLS(I,J,L,jls_N2O5sulf,
-     &                   -1.d0*prod_sulf*vol2mass(n_N2O5))
-        end if
+! osipov, 
+!        if(pres(L) < 245.d0 .and. pres(L) > 5.d0)then
+!          wprod_sulf=dt2*y(nn_N2O5,L)*rr(rrhet%N2O5_H2O__HNO3_HNO3,L)
+!          prod_sulf=wprod_sulf*pfactor
+!          CALL INC_TAJLS(I,J,L,jls_N2O5sulf,
+!     &                   -1.d0*prod_sulf*vol2mass(n_N2O5))
+!        end if
 
       end do                  !  ==> END ALTITUDE LOOP <==
 
