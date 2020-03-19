@@ -1,0 +1,3 @@
+    ! start from the restart file of an earlier run ...                 ISTART=8
+AIC=1JAN1951.rsfTobaA_C.nc
+GIC=GIC.144X90.DEC01.1.ext_1.nc   ! initial ground conditions
