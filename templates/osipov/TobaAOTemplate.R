@@ -1,4 +1,4 @@
-E6TmatrixF40clim_osipov_Toba.R GISS ModelE Lat-Lon Atmosphere Model, climatological ocn/atm MATRIX tracers
+E6TmatrixF40clim_TobaTemplate.R GISS ModelE Lat-Lon Atmosphere Model, climatological ocn/atm MATRIX tracers
 
 E6TmatrixF40clim: E6TmatrixF40 but adjust settings for Toba, ocean coupled to atmosphere
                (e.g. 9-year averages centered around nominal date)
@@ -24,6 +24,7 @@ Preprocessor Options
 #define CHECK_OCEAN                  ! needed to compile aux/file CMPE002
 #define SIMPLE_MESODIFF
 #define OCN_LAYERING L40_5008m
+
 #define ODIFF_FIXES_2017
 #define EXPEL_COASTAL_ICEXS
 #define NEW_BCdalbsn
@@ -107,20 +108,20 @@ RAD_UTILS ALBEDO READ_AERO ocalbedo ! radiation and albedo
 DIAG_COM DIAG DEFACC                ! diagnostics
 OCN_DRV                             ! driver for ocean-grid components
 OLAYERS                             ! ocean layering options
-OCEAN_COM  OGEOM                    ! dynamic ocean modules
+ODIAG_COM  OCEAN_COM  OGEOM         ! dynamic ocean modules
 OCNDYN  OCNDYN2  OTIDELL            ! dynamic ocean routines
 OCN_Interp                          ! dynamic ocean routines
 OSTRAITS_COM  OSTRAITS              ! straits parameterization
 OCNKPP                              ! ocean vertical mixing
 OCNMESO_DRV OCNTDMIX OCNGM          ! ocean mesoscale mixing
 OCEANR_DIM  OFLUXES
-ODIAG_COM ODIAG_ZONAL               ! ocean diagnostics modules
 ODIAG_PRT                           ! ocean diagnostic print out
 OCNFUNTAB                           ! ocean function look up table
 SparseCommunicator_mod              ! sparse gather/scatter module
 OCNQUS                              ! QUS advection scheme
 OCNGISS_TURB                        ! GISS Turbulence vertical mixing scheme
 OCNGISS_SM                          ! GISS Sub-mesoscale mixing scheme
+ODIAG_ZONAL
 
 OCN_Int_LATLON                      ! atm-ocn regrid routines
 
@@ -192,6 +193,7 @@ Ent
 
 Component Options:
 OPTS_Ent = ONLINE=YES PS_MODEL=FBB PFT_MODEL=ENT 
+OPTS_dd2d = NC_IO=PNETCDF
 !make> no PNETCDFHOME - removing NC_IO=PNETCDF
 
 Data input files:
@@ -447,6 +449,7 @@ Label and Namelist:  (next 2 lines)
 E6TmatrixF40clim (climatological prescribed ocean atmospheric tracer model with MATRIX and Shindell chemistry)
 
 &&PARAMETERS
+
 ! parameters set for coupled ocean runs:
 KOCEAN=1            ! ocn is prognostic
 OBottom_drag=1      !  Drags at the ocean bottom (NO drags -> OBottom_drag=0)
@@ -688,7 +691,6 @@ ch4_init_nh=0.791      ! init cond/fixed conditions NH CH4 ppmv
 fix_CH4_chemistry=0    ! for setting fixed methane value for chemistry:
 scale_ch4_IC_file=1.d0 ! multiplicative factor on CH4 IC file (fix_CH4_chemistry=-1)
 ! --- end of CH4 tracers specific settings ---
-
 
 !osipov, turn on the SO2
 so2x=1.

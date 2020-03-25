@@ -173,7 +173,7 @@ OPTS_Ent = ONLINE=YES PS_MODEL=FBB PFT_MODEL=ENT
 
 Data input files:
     ! start from the restart file of an earlier run ...                 ISTART=8
-AIC=1JAN1955.rsfTobaAO_0x_uv.nc
+AIC=1JAN1955.rsfTobaA_C.nc
 GIC=GIC.144X90.DEC01.1.ext_1.nc   ! initial ground conditions
 
 OSST=OST_144x90.1876-1885avg.CMIP6.nc     ! climatological ocean temperature
