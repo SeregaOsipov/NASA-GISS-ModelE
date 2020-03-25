@@ -1,0 +1,6 @@
+    ! lat-lon grid specific source codes
+AtmRes
+GEOM_B                              ! model geometry
+DIAG_ZONAL GCDIAGb                  ! grid-dependent code for lat-circle diags
+!osipov switch POUT to POUT_netcdf
+DIAG_PRT POUT_netcdf                       ! diagn/post-processing output

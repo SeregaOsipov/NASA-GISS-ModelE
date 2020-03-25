@@ -1,0 +1,12 @@
+OFTAB=OFTABLE_NEW                   ! ocean function table
+KBASIN=KB288X180.modelE.BS1.nc      ! ocean basin designations (1 cell Bering Strait )
+TOPO_OC=altocnbc288x180_20170717/OZ1QX1N.BS1.BAB.PG.HB.GIB.SIC.nc    ! ocean fraction and topography
+TIDES=TIDAL_e_v2_1QX1               ! ocean bottom tidal energy and velocity squared
+OSTRAITS=altocnbc288x180_20170717/OSTRAITS_288x180_zspec_BAB.T4.nml  ! parameterized straits info
+TOPO=Z2HX2fromZ1QX1N.BS1.nc        ! surface fractions and topography (1 cell Bering Strait )
+ICEDYN_MASKFAC=iceflowmask_144x90.nc
+
+TDISS=altocnbc288x180_20170717/TIDAL_e_v2_1QX1.HB.nc
+TDISS_N=tdiss/Jayne2009_288x180.nc
+POROS=altocnbc288x180_20170717/poros.nc
+

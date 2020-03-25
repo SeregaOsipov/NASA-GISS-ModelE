@@ -1,0 +1,3 @@
+    ! start from the restart file of an earlier run ...                 ISTART=8
+AIC=1JAN1954.rsfTobaAO_0x_uv.nc
+

@@ -66,4 +66,9 @@ FFLAGS += -traceback
 LFLAGS += -traceback
 F90FLAGS += -traceback
 LFLAGSF += -traceback
+# original set of parameters
+#FFLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
+#LFLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
+#F90FLAGS += -CB -fpe0 -check uninit -ftrapuv -traceback
+#LFLAGSF += -CB -fpe0 -check uninit -ftrapuv -traceback
 endif

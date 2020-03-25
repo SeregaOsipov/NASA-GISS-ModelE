@@ -1,0 +1,22 @@
+! parameters that affect at most diagn. output:  standard if DTsrc=1800. (sec)
+aer_rad_forc=0   ! if set =1, radiation is called numerous times - slow !!
+cloud_rad_forc=1 ! calls radiation twice; use =0 to save cpu time
+SUBDD='tsavg sst slp z_surf p_surf'        ! no sub-daily frequency diags
+SUBDD1='t q z p_3d' !3D output tcp qcp
+!SUBDD2='swhr lwhr'
+SUBDD3='SO2 OH_conc MRO3 M_H2O'
+SUBDD4='uvindexmax uvindexcsmax uvindexcsnamax uvindexcsnanso2max'
+!SUBDD5='uvindex:1i uvindexcs:1i'
+SUBDD6='asaod3d' ! csaod3d' !3d aod output
+SUBDD7='asaod' ! csaod' !2d aod output
+NSUBDD=48         ! saving sub-daily diags every NSUBDD-th physics time step (1/2 hr)
+!subdd_npres=21        ! number of pressure levels
+!subdd_pres=1000.,925.,850.,700.,600.,500.,400.,300.,250.,200.,150.,100.,70.,50.,30.,20.,10.,5.,1.,0.5,0.1 ! pressure levels, must be in descending order
+KCOPY=1          ! 0: no output; 1: save .acc; 2: unused; 3: include ocean data
+KRSF=3          ! 0: no output; X: save rsf at the beginning of every X month
+isccp_diags=1    ! use =0 to save cpu time, but you lose some key diagnostics
+nda5d=13         ! use =1 to get more accurate energy cons. diag (increases CPU time)
+nda5s=13         ! use =1 to get more accurate energy cons. diag (increases CPU time)
+ndaa=13
+nda5k=13
+nda4=48          ! to get daily energy history use nda4=24*3600/DTsrc
