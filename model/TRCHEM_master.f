@@ -109,7 +109,8 @@ c
       use photolysis, only: fastj2_drv,o3_fastj,so2_fastj,rj
      &                     ,sza,szamax,zj,jpnl,sf3_fact,sf2_fact,fff
      &                     ,NWWW
-
+! osipov     
+      use dictionary_mod, only : get_param, sync_param
       IMPLICIT NONE
 
 #ifdef CACHED_SUBDD
@@ -227,6 +228,11 @@ C**** Local parameters and variables and arguments:
      &                     uvindexCSnAnSO2
 ! osipov, TODO: bug fix
       real*8 :: uvIndexItem = 0.d0
+      
+!osipov 
+!@dbparam cl_daytime_hetchem_on_sulfate = 1 turns on the ClONO2_HCl__Cl_HNO3 reaction rates on the sulfate aerosols,  only daytime
+      integer :: cl_daytime_hetchem_on_sulfate = 1      
+      call sync_param( "cl_daytime_hetchem_on_sulfate", cl_daytime_hetchem_on_sulfate )
 
       call modelEclock%get(hour=hour)
 
@@ -1037,6 +1043,8 @@ c       if there is reaction on strat particulate (in Crates), use that
           wprod_sulf=0.d0
         end if
         ! we used to limit (w)prod_sulf here w.r.t. N2O5
+        
+        ! osipov nighttime ClO chemistry is below (lines 1170)
 
 C*****************************************************************
 c g signifies gas phase
@@ -2766,6 +2774,7 @@ C**** GLOBAL parameters and variables:
       USE TRACER_COM, only: n_ASO4,nbins
 #endif
       USE GEOM, only : lat2d_dg,byaxyp,axyp
+      use dictionary_mod, only : get_param, sync_param
 
       IMPLICIT NONE
 
@@ -2790,6 +2799,10 @@ C**** Local parameters and variables and arguments:
       REAL*8, DIMENSION(LM) :: PRES ! = PMIDL00(1:LM). Keeps LM dimension not top of chem
       INTEGER               :: LAXt,LAXb
       real*8, allocatable, dimension(:) :: PSCEX,rkext
+      
+      !osipov 
+      integer :: cl_daytime_hetchem_on_sulfate = 1      
+      call get_param( "cl_daytime_hetchem_on_sulfate", cl_daytime_hetchem_on_sulfate )
 
       allocate( PSCEX(topLevelOfChemistry) )
       allocate( rkext(topLevelOfChemistry) )
@@ -3006,6 +3019,12 @@ c         in troposphere loss is rxn on sulfate, in strat rxn w PSC or sulfate
           CALL INC_TAJLS(I,J,L,jls_N2O5sulf,
      &                   -1.d0*prod_sulf*vol2mass(n_N2O5))
           rr(rrhet%N2O5_H2O__HNO3_HNO3,L)=wprod_sulf/(dt2*y(nn_N2O5,L))
+          
+          ! osipov add rrhet for halogens on sulfate
+          ! osipov, note the 4d-2 scale, it should account for reactive uptake and molecular speed differences with N2O5
+          if (cl_daytime_hetchem_on_sulfate.eq.1) then
+            rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)=wprod_sulf/(dt2*y(nn_ClONO2,L))*4d-2
+          endif
 
 ! osipov, get rid out the remaining else block, but keep the PSCs stuff
 !        else  
