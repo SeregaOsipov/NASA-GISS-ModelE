@@ -2737,7 +2737,8 @@ C Make sure nighttime chemistry changes are not too big:
 C**** GLOBAL parameters and variables:
       USE RESOLUTION, only  : LM
       USE MODEL_COM, only: Itime,ItimeI
-      USE TRACER_COM, only: coupled_chem,trm,nn_N2O5,n_N2O5,n_SO4
+      USE TRACER_COM, only: coupled_chem,trm,nn_N2O5,n_N2O5,n_SO4,
+     &                      nn_ClONO2
       USE TRDIAG_COM, only: jls_N2O5sulf
       USE OldTracer_mod, only: vol2mass
       USE RAD_COM, only  : rad_to_chem
@@ -3013,7 +3014,8 @@ c         in troposphere loss is rxn on sulfate, in strat rxn w PSC or sulfate
           
           ! osipov add rrhet for halogens on sulfate
           ! osipov, note the 4d-2 scale, it should account for reactive uptake and molecular speed differences with N2O5
-          rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)=wprod_sulf/(dt2*y(nn_ClONO2,L))*4d-2
+          rr(rrhet%ClONO2_H2O__HOCl_HNO3,L)=wprod_sulf/
+     &      (dt2*y(nn_ClONO2,L))*4d-2
 
 ! osipov, get rid out the remaining else block, but keep the PSCs stuff
 !        else  
